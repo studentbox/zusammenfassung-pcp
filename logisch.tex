@@ -1,2 +1,77 @@
 \chapter{Logische Programmierung}
 
+\section{Negation von Prädikaten}
+
+In Prolog kann eine Negation entweder mit einem Cut-Operator (\verb|!/0|) kombiniert mit \verb|fail/0| oder mit \verb|not/1| ausgedrückt werden. Als Beispiel verwenden folgende Aussage \textit{Mary mag alle Tiere ausser Schlangen}. Listing \ref{lst:negation} zeigt das obengennante Beispiel.
+
+\begin{lstlisting}[caption=Negation, label=lst:negation]
+% Wenn X eine Schlange unterbreche Backtracking und Regel ist falsch
+likes(mary, X) :- snake(X), !, fail.
+% Mit not/1
+likes(mary, X) :- animal(X), not(snake(X)).
+% Mary mag alle Tiere
+likes(mary, X) :- animal(X).
+\end{lstlisting}
+
+Für \verb|not/1| gibt es noch eine alternative Syntax \verb|\+/1|, die aber die gleiche Funktion hat. \verb|not/1| ist in Prolog als \textit{schwache Negation} (negation as failure) definiert. Schwache Negation basiert auf der Closed-World-Assumption (CWA) und nicht auf der Negation in der mathematischen Logik. In Prolog wird angenommen, dass jedes Programm alles Wahre über die Welt beschreibt. Deshalb wird alles was nicht im Programm beschrieben ist als falsch angenommen. Deshalb wird die Negation von Dingen, die das Programm nicht weiss immer als wahr angenommen (schwache Negation - CWA). Listing \ref{lst:cwa} zeigt das Prolog findet die Welt ist nicht rund, obwohl sie dass eigentlich ist. Dadurch können in Prolog komische Resultate entstehen.
+
+\begin{lstlisting}[caption=CWA, label=lst:cwa]
+round(ball)
+
+?- round(ball).
+true. % as expected
+
+?- round(earth).
+false. % caused by the CWA
+
+?- not(round(earth)).
+true. % caused by negation as failure
+\end{lstlisting}
+
+Zudem sollte man darauf achten, dass die Variable welche \verb|not(X)| übergeben wird vorher immer instanziert ist. Sonst kann es zu unerwünschten Nebeneffekten kommen.
+
+\section{Constraint Logik Programmierung}
+
+In Prolog können Constraint-Satisfaction-Probleme (CSP) relativ einfach mit Constraint Logik Programming (CLP) gelöst werden. Ein CSP muss über folgende drei Eigenschaften verfügen:
+\begin{enumerate}
+	\item Eine Menge von Variablen
+	\item Domänen, aus welchen die Variablen Werte annehmen können
+	\item Constraints (Bedingungen) welche die Variablen erfüllen müssen
+\end{enumerate}
+Vereinfacht gesagt setzt CLP alle Werte der gegebenen Domäne in die Variablen ein bis die Bedingungen erfüllt sind. Damit CLP funktioniert muss eine Bibliothek (z.B. \verb|use_module(library(clpr)).|) importiert werden, welche die Domäne darstellt. Die entsprechende Bedingung muss in gschweifte Klammern geschrieben werden (z.B. \verb|{ X + 1 = 5}|). In Prolog stehen die folgenden drei Domänen zur Verfügung:
+\begin{description}
+	\item[CLP-R:] Alle Variablen müssen reelle Zahlen annehmen
+	\item[LP-Q:] Alle Variablen müssen rationale Zahlen annehmen
+	\item[CLP-FD] Alle Variablen müssen Zahlen aus einem selbst definierten Wertebereich annehmen.
+\end{description}
+Bei CLP-FD können die Domänen (Wertebereiche) programmatisch definiert werden. Dabei sind folgende Prädikate wichtig:
+\begin{description}
+	\item[in/2:] Legt den Wertebereich einer Variablen fest
+	\item[ins/2:] Legt den Wertebereich einer Liste von Variablen fest
+	\item[all\_distinct/1:] stellt sicher, dass Variablen in einer Liste paarweise unterschiedliche Werte haben
+	\item[label/1:] Weist allen Variablen einer Liste Werte zu (dadurch werden systematisch Lösungen für das gegebene Problem gesucht)
+\end{description}
+Zudem haben alle Vergleichsoperatoren den Präfix \verb|#| (z.B. \verb|#>|). Listing \ref{lst:clp-fd} zeigt einige Beispiele zu den oben genannten Prädikaten.
+\begin{lstlisting}[caption=CLP-FD, label=lst:clp-fd]
+?- use_module(library(clpfd)).
+% ... (output omitted here)
+true.
+
+?- X in 5..9, X #> 8.
+X = 9.
+
+?- [X, Y] ins 1..2, X #=< 1, Y #\= 1.
+X = 1,
+Y = 2.
+
+?- [X, Y] ins 1..2, all_distinct([X, Y]).
+X in 1..2,
+all_distinct([X, Y]),
+Y in 1..2.
+
+?- [X, Y] ins 1..2, all_distinct([X, Y]), label([X, Y]).
+X = 1,
+Y = 2 % press ;
+X = 2,
+Y = 1.
+\end{lstlisting}
