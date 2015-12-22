@@ -1,1 +1,133 @@
-\chapter{Funktionale Programmierung}
+\chapter{Funktionale Programmierung (Scheme)}
+
+\section{Funktionen höherer Ordnung}
+
+In der funktionalen Programmierung werden grundsätzlich zwei Arten von Funktionen unterschieden:
+\begin{description}
+	\item[Funktionen erster Ordnung:] Die Berechnungsmethodik ist fest vorgegeben, nur die Werte der Variablen können unterschiedlich sein.
+	\item[Funktionen höherer Ordnung:] Die Berechnungsmethodik sowie die Werte der Variablen können von aussen übergeben werden.
+\end{description}
+Funktionen sind in Scheme \textit{Werte erster Klasse}, den sie können als Parameter oder Rückgabewert dienen, an Namen gebunden werden und in Listen aufgenommen werden. Funktionen, die andere Funktionen als Parameter und/oder Resultat haben, heissen \textit{Funktionen höherer Ordnung}, bzw. \textit{Higher-Order Functions}. Durch \textit{Funktionen höherer Ordnung} lassen sich komplexe Sachverhalte einfach und kompakt darstellen. In Prolog kann nur \verb|not| als Funktion der booleschen Operatoren übergeben werden. \verb|and| und \verb|or| können nicht als Parameter übergeben werden. Scheme bietet zahlreiche Funktionen (\verb|filter|, \verb|map|, \verb|apply|) an, um effizient mit Listen zu arbeiten.
+
+\subsection{Funktion \texttt{filter}}
+
+Die Funktion \verb|(filter <function> <list>)| wendet \verb|<function>| auf jedes Element von  \verb|<list>| an und liefert eine neue Liste von Elementen zurück, auf die \verb|<function>| zutrifft. \verb|<function>| darf nur ein Argument besitzen (Das jeweilige Element der Liste) und muss einen booleschen Wert zurückliefern (Wenn \verb|true| kommt Element in neue Liste sonst nicht). Listing \ref{lst:funktion-filter} zeigt die Anwendung der \verb|filter|-Funktion mit einem eigenen Prädikat.
+
+\begin{lstlisting}[language=Lisp, caption=Funktion filter, label=lst:funktion-filter]
+; Eigene Prädikatsfunktion
+(define (squarenumber? value)
+	(integer? (sqrt value))
+)
+
+> (filter squarenumber? (list 1 2 4 8 16 32 64))
+(list 1 4 16 64)
+\end{lstlisting}
+
+\subsection{Funktion \texttt{map}}
+
+Die Funktion \verb|(map <function> <list1>…<listN>)| wendet \verb|<function>| auf jedes Element \verb|<list1>…<listN>| an und liefert eine neue Liste zurück. Wenn z.B. zwei Listen (Liste A und B) übergeben werden, wird das erste Element der Liste A und das erste Element der Liste B an \verb|<function>| übergeben und den Rückgabewerte in die neue Liste gespeichert. Danach wird das zweite Element von A und das zweite Element von B übergeben. Deshalb muss \verb|<function>| soviele Argumente besitzen, wie Listen übergeben wurden. Zudem darf \verb|<function>| die Listen nicht verändern. In Listing \ref{lst:funktion-map} wird \verb|map| auf eine bzw. zwei Listen angewendet.
+
+\begin{lstlisting}[language=Lisp, caption=Funktion map, label=lst:funktion-map]
+> (map sqr (list 3 5 -6 -23 37 2))
+(list 9 25 36 529 1369 4)
+
+> (map + (list 1 2 3) (list 4 5 6))
+(list 5 7 9)
+\end{lstlisting}
+
+\subsection{Funktion \texttt{apply}}
+
+Die Funktion \verb|(apply <function> <value>…<list>)| nimmt die \verb|<function>| und übergibt \verb|<value>…<list>| als Argumente. Der Aufruf \verb|(apply + 1 -2 3 '(10 20))| ist das selbe wie \verb|(+ 1 -2 3 10 20)|. Als \verb|<value>…<list>| können Werte und/oder Listen übergeben werden. Das letzte Argument muss aber immer eine Liste sein. Natürlich muss \verb|<function>| gleich viele Argumente besitzen, wie es \verb|<value>…<list>| gibt. Listing \ref{lst:funktion-apply} zeigt zwei Anwendungen von \verb|apply|.
+
+\begin{lstlisting}[language=Lisp, caption=Funktion apply, label=lst:funktion-apply]
+> (apply / 256 (list 2 4 8))
+4 ; 256 wird durch alle Werte geteilt
+
+> (map + (list 1 2 3) (list 4 5 6))
+(list 5 7 9)
+\end{lstlisting}
+
+Wenn du meinst \verb|map| und \verb|apply| machen eigentlich das selbe, schau mal hier rein\footnote{\href{http://stackoverflow.com/questions/27488723/what-is-the-difference-between-map-and-apply-in-scheme}{http://stackoverflow.com/questions/27488723/what-is-the-difference-between-map-and-apply-in-scheme}} rein.
+
+\section{Anonyme Funktionen}
+
+In Scheme liefert die Auswertung eines Lambda-Ausdrucks eine anonyme Funktion zurück. Ein Lambda-Ausdruck hat folgende Syntax \verb|((lambda (<formal parameters>) <expression>) <argument-list>)|. Die Parameter der Funktion werden beim Ausdruck \verb|<formal parameters>| übergeben. Der Rumpf der Funktion ist der \verb|<expression>|-Teil. Zudem kann eine Liste von Argumenten definiert werden, welche den Parametern zugewiesen werden. Listing \ref{lst:lambda-scope} zeigt, dass ein Parameter welcher in der Lambda-Funktion definiert wurde, nicht von aussen beeinflusst werden kann.
+
+\begin{lstlisting}[language=Lisp, caption=Scope eines Lambda-Ausdrucks, label=lst:lambda-scope]
+> (define x 100)
+> (define y 200)
+> ((lambda (x) (+ x y)) 100) ; Das x oben hat nichts mit diesem x zu tun
+300
+\end{lstlisting}
+
+Lambda-Ausdrücke sollte man nur verwenden, wenn die Funktion nur einmal gebraucht wird. Sie können deshalb nicht zur Rekursion verwendet werden. Das Wort \textit{Lambda} kommt vom Lambda-Kalkül. Das Lambda-Kalkül besteht aus folgenden drei Bausteinen:
+\begin{description}
+	\item[Variablen:] Variablen definieren keinen veränderbaren Speicherplatz, sondern sind Variablen im mathematischen Sinne (Platzhalter für konkrete Werte)
+	\item[Funktionsabstraktion:]  $\lambda$ x . A definiert eine (anonyme) Funktion, die ein x bekommt, und einen Ausdruck A als Funktionskörper hat (in dem x vorkommen kann, aber nicht vorkommen muss)
+	\item[Funktionsapplikation:] F A bedeutet, dass die Funktion F auf den Ausdruck A angewandt wird
+\end{description}
+Zudem gibt es im Lambda-Kalkül nur Funktionsabstraktionen und Funktionsapplikationen (Es gibt keine Zahlen, Wahrheitswerte, Funktionsnamen usw.). Damit lassen sich dann tolle Sachen machen, die man nicht verstehen muss.
+
+\section{Funktionen mit Gedächtnis}
+
+In der rein funktionalen Programmierung bekommt man für die gleiche Eingabe immer die gleiche Ausgabe einer Funktion. Man kann also den Funktionsaufruf durch seinen Wert ersetzen, ohne den Sinn des Programms zu verändern (z.B. \verb|(+ 3 5)| durch \verb|8| ersetzen). Diese Eigenschaft wird referentielle Transparenz genannt. Funktionen mit Gedächtnis sind nicht mehr rein funktional, weil durch den Zustand Nebeneffekte entstehen können. 
+
+Mit dem Ausdruck \verb|(set! <variable> <expression>)| kann einer Variable ein Wert zugewiesen werden. Dabei muss der Name der \verb|<variable>| definiert sein. Es wird der Ausdruck \verb|<expression>| ausgewertet und der resultierende Wert an den Namen der \verb|<variable>| gebunden. Listing \ref{lst:counter} zeigt einen einfachen Zähler mit Gedächtnis.
+
+\begin{lstlisting}[language=Lisp, caption=Zähler mit Gedächtnis, label=lst:counter]
+(define counter-value 0)
+(define (increment-counter)
+	(set! counter-value (+ 1 counter-value)))
+	
+> counter-value
+0
+> (increment-counter)
+(void) ; Rückgabewert von set! nicht definiert
+> counter-value
+1
+\end{lstlisting}
+
+Ein weiteres Element der imperativen Programmierung in Scheme ist die Sequenz. Eine Sequenz hat die Form \verb|(begin <expression-1>...<expression-N> <expression>)| und wertet alle \verb|expressions| in der gegebenen Reihenfolge aus. Die Sequenz liefert dann den Wert von \verb|expression| zurück.
+
+\section{Ein- und Ausgabe}
+
+Scheme benutzt Ports für die Ein- und Ausgabe. Ports bedienen Datenquellen oder -senken, z.B. File, Terminal oder TCP Verbindung. Ein Port muss offen sein, bevor man ihn zum Lesen oder Schreiben benutzen kann. Der Standard I/O Port, d.h. der Konsolen I/O-Port, ist beim Start von Scheme automatisch offen. Listing \ref{lst:read-file} zeigt wie man in Scheme eine Datei einliest. 
+
+\begin{lstlisting}[language=Lisp, caption=Datei lesen, label=lst:read-file]
+; Port öffnen, um aus der Datei zu lesen
+(define in (open-input-file "data.txt"))
+
+(define (read-file a-list)
+	; Daten lesen
+	(let ((data (read in)))
+		(cond
+			; Wenn EOF Liste zurückgeben
+			((eof-object? data) a-list)
+			; Wenn nicht Daten an Liste anhängen und read-file aufrufen
+			(else (read-file (cons data a-list)))
+		)
+	)
+)
+\end{lstlisting}
+
+Listing \ref{lst:write-file} zeigt wie man eine Liste in eine Datei schreibt. Existiert die Datei bereits wird ein Laufzeitfehler generiert.
+
+\begin{lstlisting}[language=Lisp, caption=Datei schreiben, label=lst:write-file]
+; Port öffnen, um in Datei zu schreiben
+(define out (open-output-file "output.txt"))
+
+(define (output-file a-list)
+	; Wenn Liste leer, Zeilenumbruch schreiben
+	(cond ((null? a-list) (newline out))
+					 ; Erstes Wort der Liste schreiben
+		(else (begin (write (first a-list) out)
+					 ; Leerschlag einfügen
+					 (write-char #\space out)
+					 ; Rest der Liste schreiben
+					 (output-file (rest a-list)))
+		)
+	)
+)
+\end{lstlisting}
+
+Es sollte nach jeder Schreib- bzw. Leseoperation der Port geflusht und geschlossen werden. In Scheme stehen zahlreiche Bibliotheken für Lese-/Schreib-Funktionen zur Verfügung (z.B. batch-io).
