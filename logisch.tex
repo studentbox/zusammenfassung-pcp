@@ -1,4 +1,203 @@
 \chapter{Logische Programmierung (Prolog)}
+Das Programmierparadigma von Prolog ist \textbf{deklarativ-logisch}. Prolog ist ein Akronym für PROgrammation en LOGique. Wir beschreiben mit Logik WAS wir wollen und nicht WIE wir es berechnen. Die wichtigsten Mechanismen in Prolog sind \textbf{Matching} und \textbf{automatisches Backtracking}. Zentral ist die \textbf{Wissensdatenbank}, worin alle \textbf{Fakten \& Regeln} stecken. Die Wissensdatenbank kann angefragt werden, wobei Prolog darauf entsprechend antwortet.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.7\linewidth]{fig/prolog-funktionsweise}
+\caption{Funktionsweise Prolog}
+\label{fig:funktionsweise-prolog}
+\end{figure}
+
+\begin{lstlisting}[caption=Wissensdatebank mit nur Fakten]
+% In folgender Wissensdatenbank sind drei Fakten enthalten. Bigger definiert, dass das erste Elemente grösser als das zweite Element ist.
+bigger(elephant, horse).
+bigger(horse, dog).
+bigger(horse, sheep).
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Anfrage 1]
+% Gegen die Wissensdatenbank kann eine Anfrage gemacht werden. Prolog prüft ob es für die Anfrage einen Match gibt. Jedoch existiert aber keine Match dafür. Nirgends ist definiert, dass ein Hund grösser als ein Elefant ist.
+?- bigger(dog, elephant).
+false.
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Anfrage 2]
+% Für folgende Anfrage ist ein Match vorhanden. Fakt 1 in der Wissensdatenbank matcht die Anfrage.
+?- bigger(elephant, horse).
+true.
+\end{lstlisting}
+
+\newpage
+\begin{lstlisting}[caption=Anfrage mit Variable]
+% Bei Anfragen können auch Variabeln definiert werden. Alle gross geschriebenen Wörter sind Variabeln. Prolog sucht nun nach allen Matches, welche als erstes Element horse haben. Als Resultat werden alle möglichen X Werte geliefert. (Prolog liefert immer nur ein Resultat - möchte man weitere Resultate ansehen, muss Semikolon gedrückt und um die Abfrage zu beenden den Punkt Operator wählen.)
+?- bigger(horse, X).
+X = dog ;
+X = sheep ;
+false.
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Transitive Hülle von \emph{bigger/2}]
+% Wir wissen implizit, dass der Elefant grösser ist als der Hund. Da der Elefant grösser als das Pferd ist und das Pferd grösser als der Hund. Aber eine Anfrage ob der Elefant nun grösser als der Hund ist, würde false liefern. Es müssen Regeln definiert werden, welche diese Beziehung unter den Fakten abbilden. Wir definieren für bigger/2 eine transitive Hülle.
+is_bigger(X, Y) :- bigger(X, Y).
+is_bigger(X, Y) :- bigger(X, Z), is_bigger(Z, Y).
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Transitive Anfrage]
+?- is_bigger(elephant, dog).
+true.
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Transitive Anfrage mit Variabeln]
+% Selbstverständlich können nun auch Anfragen mit Variabeln über die transitive Hülle durchgeführt werden.
+?- is_bigger(X, dog).
+X = horse ;
+X = elephant ;
+false.
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Verknüpfen von Anfragen]
+% Es können auch verknüpfte Anfragen (UND) ausgeführt werden.
+?- is_bigger(elephant, X), is_bigger(X, dog).
+X = horse ;
+false.
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Regel umkehren]
+% Eine is_smaller/2-Regel ist schnell implementiert.
+is_smaller(X, Y) :- is_bigger(Y, X).
+\end{lstlisting}
+
+\newpage
+\section{Syntax}
+In Prolog gibt es verschiedene Typen von Termen.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\linewidth]{fig/prolog-terme}
+\caption{Übersicht Terme in Prolog}
+\label{fig:prolog-terme}
+\end{figure}
+
+\begin{description}
+	\item[Zahlen] (numbers) Gelten auch als atomare Terme (atomic Terms): 123, 4657.8, -9
+	
+	\item[Atome] (atoms) Beginnen mit Kleinbuchstaben oder sind in einfachen Anführungszeichen eingeschlossen. Gelten auch als atomare Terme (atomic Terms): elephant, 'mein text'
+	
+		\item[Zusammengesetzte Terme] (compound terms) Bestehen aus dem Funktor (functor) und Argumenten. Der Funktor ist ein Atom (is\_bigger) und die Argumente sind Terme: is\_bigger(horse, X)
+	
+	\item[Variablen] (variables) Beginnen mit Grossbuchstaben oder einem Unterstrich: X, Elephant, \_, \_elephant
+	
+	\item[Anonyme Variable] Die Variable \_ (Unterstrich) heisst \textbf{anonyme Variable}. Diese dient als Platzhalter, dessen Wert nicht interessiert. Jedes auftreten repräsentiert eine neue Variable. 
+	
+	\begin{lstlisting}[caption=Anfrage mit anonymer Variable]
+	?- is_bigger(_, horse).
+	true .
+	\end{lstlisting}
+		
+	\item[Grundterme] (ground terms) Terme ohne Variablen. Diese sind als sogenannte Fakten bekannt: bigger(you, me) oder write('hello').
+	
+	\item[Prädikate] (predicates) Atome und zusammengesetzte Terme. Treten sie als Atome auf sind es Fakten (bigger) sonst sind es Regeln (is\_bigger(X, Y) :- bigger(X, Y).
+	
+	\item[Stelligkeit] (arity) Die Stelligkeit eines Prädikats zeigt auf wie viele Argumente das Prädikat entgegennimmt. Die Stelligkeit wird am Schluss des Prädikats angegeben: is\_bigger/2
+	
+	\item[Anfragen] (queries) sind Prädikate oder Sequenzen von Prädikaten gefolgt von einem Punkt. Der Punkt veranlasst Prolog zu antworten.
+	
+	\item[Klauseln] (clauses) sind Fakten und Regeln (zusammengesetzte Terme).
+	
+	\item[Prozedur] (procedure) Alle Klauseln zum gleichen Prädikat (d.h alle Relationen mit gleichem Name (Funktor) \& Stelligkeit).
+	
+	\item[Prolog-Programm] Liste aller Klauseln.
+	
+	\item[Fakten] (facts) Typischerweise Grundterme.
+	
+	\item[Regeln] (rules) Bestehen aus einem Kopf (head) und einem Hauptteil (body), welche durch :- getrennt sind. Der Kopf einer Regel ist wahr, wenn alle Ziele (Prädikate) im Hauptteil als wahr bewiesen werden. Ziele werden durch Komma getrennt, welches eine UND-Verknüpfung darstellt (Konjunktion).
+	
+	\begin{lstlisting}[caption=Regel]
+	grandfather(X, Y) :- % head
+	father(X, Z), % body, goal 1
+	parent(Z, Y). % body, goal 2
+	\end{lstlisting}
+	
+	\emph{Prolog nutzt ein spezielles System von logischen Formeln, die sogenannten \textbf{Hornklauseln}: ((p1 AND p2 AND ... AND pn) -> q) }. Sind alle Bedingungen auf der linken Seite erfüllt, lässt sich die rechte Seite daraus ableiten (Konjunktion und Implikation).
+\end{description}
+
+\section{Matching}
+Wenn Anfragen an das Prolog-System gestellt werden, führt Prolog eine Beweissuche mittels Backtracking und Matching durch. Zwei Terme matchen, wenn sie identisch sind oder wenn sie durch ersetzen von Variabeln durch andere Terme identisch gemacht werden können. Mittels dem Gleichheits-Prädikat =/2 kann abgefragt werden, ob zwei Terme matchen.
+
+\begin{lstlisting}[caption=Gleichheits-Prädikat]
+?- eat(tom, burger) = eat(X, burger).
+X = tom.
+?- eat(tom, burger) = eat(X, potato).
+false.
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Gleichheits-Prädikat auf Atomen]
+% Atome matchen, wenn sie genau gleich sind.
+?- =(tom, tom). % Predefined predicate =/2
+true.
+?- tom = tom. % other style: =/2 as infix operator
+true.
+?- 'Tom' = tom. % Watch out: case sensitive!
+false.
+?- 'tom' = tom. % =/2 ignores single quotes
+true.
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Gleichheits-Prädikat auf Variabeln und Termen]
+% Falls ein Term eine Variable ist, dann matchen beide Terme und die Variable wird dem Wert des zweiten Terms instanziiert.
+?- pia = X.
+X = pia.
+?- sing(pia) = X.
+X = sing(pia).
+?- X = Y.
+X = Y.
+?- X = Y, X = pia.
+X = Y, Y = pia.
+?- X = Y, X = pia, Y = tom.
+false.
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Gleichheits-Prädikat auf zusammengesetzten Termen]
+% Matchen wenn gleicher Funktor, gleiche Stelligkeit und alle korrespondierende Argumente matchen.
+?- meet(drink(pia), eat(X)) = meet(Y, eat(tom)).
+X = tom,
+Y = drink(pia).
+?- meet(X, X) = meet(drink(pia), tom).
+false.
+?- meet(pia, tom) = meet(Y).
+false.
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Unendliche Terme]
+% Was passiert da?
+?- f(A)=A.
+% Gemäss Matching-Regeln müsste das Resultate so aussehen (unendlich):
+A = f(f(f(f(f(f(f(f(f(f(f(...
+% Da in Prolog standardmässig kein occurs-check gemacht wird, kommt folgendes:
+A = f(A).
+\end{lstlisting}
+
+\emph{In der Logik ist die Unifikation ein bekanntes Verfahren zur Verinheitlichung von Ausdrücken. Ähnlich wie bei Prolog das Matching. Der Unterschied besteht darin, dass beim Matching kein occurs-check gemacht wird. Falls eine Variable mit einem Term vereinheitlicht wird, wird zuerst geprüft, ob diese Variable in diesem Term vorkommt. Aus Effizienzgründen wird das in Prolog nicht gemacht. Es kann jedoch explizit ausgeführt werden unify\_with\_occurs\_check(+Term1, +Term2) was beim obigen Beispiel zu false evaluieren würde.}
+
+\section{Beweissuche und Suchbäume}
+Das Prolog-System versucht die Anfrage zu beweisen. Dazu versucht es die Fakten und Regeln in der Wissensdatenbank zu matchen. Dabei verwendet es ein Backtracking-Algorithmus, welches eine Tiefensuche darstellt. Falls die Anfrage aufgelöst werden kann, liefert es true oder gegebenenfalls die Matchings zurück. Ansonsten false. Die Anordnung der Regel und Fakten in der Wissensdatenbank beeinflusst wie schnell Prolog zu einer Lösung kommt.
+
+\begin{itemize}
+	\item Suche in der Wissensdatenbank von oben nach unten
+	\item Abarbeitung der Abfrage-Klauseln von links nach rechts
+	\item Backtracking zur Erholung von „schlechten“ Pfaden
+\end{itemize}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.47\linewidth]{fig/prolog-beweissuche-suchbaueme}
+\caption{Prolog: Beweissuche und Suchbäume}
+\label{fig:prolog-beweissuche-suchbaueme}
+\end{figure}
+
+\section{Deklarative vs. Prozedurale Bedeutung}
+Grundsätzlich reicht es in Prolog die deklarative Bedeutung (WAS - Problem-Beschreibung - deklarativ-logisch) anzugeben und es muss nicht die prozedurale Bedeutung (WIE - Beschreibung der Problemlösung - imperativ) definiert werden. Der deklarative Weg reicht leider nicht immer. Aus Ausführungseffizienzgründen gibt es in Prolog prozedurale Konstrukte wie Endrekursion, Assertions, Cut-Operator \& Negation.
+
 
 \section{Negation von Prädikaten}
 
@@ -75,3 +274,10 @@ Y = 2 % press ;
 X = 2,
 Y = 1.
 \end{lstlisting}
+
+\section{Eingebaute Prädikate}
+
+\begin{description}
+	\item[write(+Term)] Mittels write('hallo') kann ein Term auf die Konsole geschrieben werden.
+	\item[read(-Term)] Kann ein Term von der Konsole eingelesen werden.
+\end{description}
