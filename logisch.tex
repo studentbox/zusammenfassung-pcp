@@ -338,7 +338,7 @@ fak(N, F) :- 			% general case
 ?- fak(X, 24). ERROR: >/2: Arguments are not sufficiently instantiated
 \end{lstlisting}
 
-\begin{lstlisting}[caption=Fibonacci]
+\begin{lstlisting}[caption=Fibonacci, label=lst:naiv-fib]
 % Naive Implementierung! Optimierung mittels Endrekursion und Assertions.
 fib(0, 0).
 fib(1, 1).
@@ -353,6 +353,219 @@ fib(N, F) :-
 ?- fib(7, X). X = 13 .
 ?- fib(6, 8). true .
 ?- fib(X, 8). ERROR: >/2: Arguments are not sufficiently instantiated (Da brauchen wir CLP!)
+\end{lstlisting}
+
+
+\section{Optimierungen}
+Backtracking ist grundsätzlich nicht sehr effizient. Wir können. Um dies zu entschärfen gibt es zwei bekannte Methoden: Endrekursion und Assertions.
+
+\subsection{Optimierung durch Endrekursion}
+Die Endrekursion ist auch bekannt als \emph{tail recursion}. Der Vorteil ist, dass kein Backtracking benötigt wird. Eine Endrekursion kann als Iteration ohne zusätzlichen Speicherplatz ausgeführt werden. Eine Prozedur ist endrekursiv, wenn:
+
+\begin{itemize}
+	\item Nur ein einzigen rekursiven Aufruf hat.
+	\item Dieser Aufruf ist der letzte Aufruf in der letzten Klausel der Prozedur.
+	\item Alle Aufrufe vor dem rekursiven Aufruf müssen deterministisch sein.
+\end{itemize}
+
+Prolog führt folgende endrekursive Prozedur als Iteration aus. Es wird viel weniger Speicherplatz benötigt. Diese Optimierung nennt sich auch \emph{last call optimization}.
+
+\begin{lstlisting}[caption=Endrekursion: Allg. Beispiel]
+p(...) :- ... 	% no recursive call in the body
+p(...) :- ... 	% no recursive call in the body
+...
+p(...) :- ..., 	% all deterministic and
+	..., 		% no recursive call until here
+	p(...). 	% tail-recursive call
+\end{lstlisting}
+
+Im Listing \ref{lst:naiv-fib} ist die rekursive Berechnung alles andere als effizient. Möchte man die Fibonacci Zahl für 30 berechnen, führt dies auf herkömmlichen Rechnern zu einem \emph{ERROR: Out of local stack}. Das Problem ist, dass viele Zwischenresultate mehrmals berechnet werden müssen. Für \emph{f(6)} muss 5x \emph{f(2)} ausgewertet werden. Die Umwandlung von einem naivem Prolog-Programm in ein endrekursives ist nicht trivial! Typischerweise werden zusätzlich neue Argumente verwendet: Akkumulatoren. Diese werden verwendet um Zwischenresultate zu speichern.
+
+\begin{lstlisting}[caption=Endrekursive Fibonnaci-Berechnung]
+fib_tr(N, F) :- fib_tr(N, 0, 1, F). % call accumulator
+fib_tr(0, A, _, A). 				% simple case
+fib_tr(N, A, B, F) :- 				% general case
+	N1 is N - 1, 					% new argument N1
+	N1 >= 0, 						% avoid underflow
+	Sum is A + B,					% accumulator Sum
+	fib_tr(N1, B, Sum, F). 			% tail-recursisve call
+\end{lstlisting}
+
+Fazit: Falls der Speicherplatz bei einer rekursiven Prozedur kritisch wird, hilft die Umwandlung in ein endrekursive Prozedur. Diese kann als Iteration ausgeführt werden, benötigt oft weitere Argumente: Akkumulatoren.
+
+\newpage
+\subsection{Optimierung durch Assertions (Memoization)}
+Die Wissensdatenbank kann nicht nur statisch sondern auch dynamisch zur Laufzeit manipuliert werden. Dies kann für Memoization (auch Caching) genutzt werden.
+
+\begin{lstlisting}[caption=dynamic/1]
+% Damit Prädikate zur Laufzeit modifiziert werden können, müssen diese mit dynamic definiert werden.
+:- dynamic bigger/2.
+bigger(elephant, horse).
+bigger(horse, dog).
+bigger(horse, sheep).
+\end{lstlisting}
+
+\begin{lstlisting}[caption=listing/1]
+% Mittels listing können die Fakten und Regel zu einem Prädikat angezeigt werden.
+?- listing(bigger).
+:- dynamic bigger/2.
+bigger(elephant, horse).
+bigger(horse, dog).
+bigger(horse, sheep).
+\end{lstlisting}
+
+\begin{lstlisting}[caption=asserta/1 \& assertz/1]
+% Asserta fügt einen neuen Fakt an den Beginn hinzu.
+?- asserta(bigger(me, you)).
+true.
+?- listing(bigger).
+:- dynamic bigger/2.
+bigger(me, you). % new fact as first rule
+bigger(elephant, horse).
+bigger(horse, dog).
+bigger(horse, sheep)..
+
+% Assertz fügt einen neuen Fakt an den Schluss hinzu.
+?- assertz(bigger(elephant, me)).
+true.
+?- listing(bigger).
+:- dynamic bigger/2.
+bigger(me, you).
+bigger(elephant, horse).
+bigger(horse, dog).
+bigger(horse, sheep).
+bigger(elephant, me). % new fact asserted as last rule
+\end{lstlisting}
+
+\begin{lstlisting}[caption=retract/1]
+% Mittels retract können Fakten/Regeln entfernt werden.
+?- retract(bigger(me, you)).
+true.
+?- listing(bigger).
+:- dynamic bigger/2.
+bigger(elephant, horse).
+bigger(horse, dog).
+bigger(horse, sheep).
+bigger(elephant, me).
+\end{lstlisting}
+
+\newpage
+\begin{lstlisting}[caption=Naive Fibonnaci optimiert mit Assertions]
+% Nach jeder Berechnung einer Fibonacci Zahl wird diese in die Wissensdatenbank an den Anfang (wichtig) gespeichert. Diese müssen nun nicht mehr neu berechnet werden.
+:- dynamic fib_as/2.
+fib_as(0, 0). 				% base case 1
+fib_as(1, 1). 				% base case 2
+fib_as(N, F) :- 			% general rule
+	N > 1, 					% allow no negative numbers
+	N1 is N-1, 
+	N2 is N-2,
+	fib_as(N1, F1), 		% calculate F1 = fib(N-1)
+	fib_as(N2, F2), 		% calculate F2 = fib(N-2)
+	F is F1+F2,
+	asserta(fib_as(N, F)). 	% assert new fact
+\end{lstlisting}
+
+\section{Listen}
+In Prolog gibt es Listen als Datenstrukturen. Eine Liste ist eine endliche Sequenz von Elementen. Listen werden mit eckigen Klammern dargestellt. Die Länger einer Liste ist die Anzahl darin enthaltenen Elemente. Listen-Elemente sind beliebige Terme. Die leere Liste [] ist eine spezielle Liste.
+
+\begin{lstlisting}[caption=Listen in Prolog]
+?- X = [a, b, c].
+X = [a, b, c].
+?- Y = [d, e, f(X), [x, y]].
+Y = [d, e, f(X), [x, y]].
+?- Z = [].
+Z = [].
+\end{lstlisting}
+
+Die nicht-leeren Listen bestehen immer aus dem ersten Element (Kopf=head) und den restlichen Elementen (Schwanz=tail). Der Schwanz ist wiederum eine Liste. Somit sind Listen rekursiv aufgebaut.
+
+\begin{lstlisting}[caption=Tail-Operator auf Listen]
+?- [a, b, c] = [Head | Tail].
+Head = a,
+Tail = [b, c].
+
+% Dies sind alles equivalente Terme.
+?- L = [a | [b, c]], L = [a, b | [c]], L = [a, b, c | []].
+L = [a, b, c].
+
+% Hier interessiert nur zweites und drittes Element.
+?- [_, X2, X3 | _] = [a, b, c, d, e, f].
+X2 = b,
+X3 = c.
+\end{lstlisting}
+
+\newpage
+\subsection{Listenzugehörigkeit}
+Ist X ein Element der Liste L? X kommt in der Liste vor, wenn X gleich Kopf der Liste ist oder wenn es im Schwanz der Liste vorkommt. 
+
+\begin{lstlisting}[caption=Listenzugehörigkeit]
+mem(X, [X | _]). 					% tail doesnt matter
+mem(X, [_| Tail]) :- mem(X, Tail). 	% head doesnt matter
+
+% Anmerkung: Wenn auf der linken Seite Variabeln definiert werden, welche auf der rechten Seite nicht verwendet werden, dann kommt es zur Warnung: Singleton Variables.
+
+?- mem(b, [a, b, c]).
+true.
+
+?- mem(d, [a, b, c]) .
+false.
+
+?- mem([b, c], [a, [b, c]]).
+true.
+
+?- mem(X, [a, b, c]).
+X = a;
+X = b;
+X = c;
+false.
+
+% Generiert unendlich lange Lösungslisten...
+?- mem(a, L), mem(b, L), mem(c, L). % which list L contains a, b, & c?
+L = [a, b, c|_G2239];
+L = [a, b, _G2238, c|_G2242];
+L = [a, b, _G2238, _G2241, c|_G2245];
+...
+
+% So wäre Permutation möglich. Die Länge der Liste beschränken!
+?- L = [_, _, _], mem(a, L), mem(b, L), mem(c, L).
+L = [a, b, c];
+L = [a, c, b];
+L = [b, a, c];
+L = [c, a, b];
+L = [b, c, a];
+L = [c, b, a];
+false.
+
+% P.S. In Prolog gibt es bereits das Prädikat member/2.
+\end{lstlisting}
+
+\newpage
+\subsection{Listenkonkatenation}
+Wir wollen wissen, ob Liste L1 und Liste L2 zusammenhängt Liste L3 ergeben. Einfacher Fall: Wenn die L1 eine leere Liste ist, dann muss L2 und L3 gleich sein. Falls die erste Liste nicht leer ist, hat diese einen Kopf und Schwanz [X, L1]. Die Konkenation muss den gleichen Kopf haben, also [X, L3].
+
+\begin{lstlisting}[caption=Listenkonkatenation]
+conc([], L, L).
+conc([X | L1], L2, [X | L3]) :- conc(L1, L2, L3).
+
+% Zwei Listen konkatenieren
+?- conc([a, b], [c, d], L).
+L = [a, b, c, d].
+?- conc([a, b], [c], [a, b, c, d]) .
+false.
+?- conc([a, [b, c], d], [a, [], b], L).
+L = [a, [b, c], d, a, [], b].
+
+% Zerlegung einer Liste in alle möglichen Teillisten
+?- conc(L1, L2, [a, b, c]).
+L1 = [],
+L2 = [a, b, c];
+L1 = [a],
+L2 = [b, c];
+L1 = [a, b],
+L2 = [c];
+L1 = [a, b, c],
+L2 = [];
+false.
 \end{lstlisting}
 
 \section{Negation von Prädikaten}
