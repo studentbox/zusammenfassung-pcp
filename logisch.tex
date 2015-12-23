@@ -568,6 +568,90 @@ L2 = [];
 false.
 \end{lstlisting}
 
+\newpage
+\section{Reihenfolge von Regeln und Zielen}
+Die Reihenfolgen der Fakten und Regeln in der Wissensdatenbank spielt ein Rolle. Auch die Reihenfolge der Ziele von Regeln.
+
+\begin{lstlisting}[caption=Reihenfolgen von Regeln und Zielen]
+% Bekanntes is_bigger/2 Prädikat:
+bigger(elephant, horse). 			% fact 1
+bigger(horse, dog). 				% fact 2
+bigger(horse, sheep). 				% fact 3
+is_bigger(X, Y) :- bigger(X, Y). 	% rule 1
+is_bigger(X, Y) :- 					% rule 2
+	bigger(X, Z), 					% rule 2, goal 1
+	is_bigger(Z, Y). 				% rule 2, goal 2
+
+% Rule 1 und Rule 2 vertauscht (Reihenfolge von Klauseln vertauscht):
+bigger(elephant, horse). 	% fact 1
+bigger(horse, dog). 		% fact 2
+bigger(horse, sheep). 		% fact 3
+ib_1(X, Y) :- 				% rule 1
+	bigger(X, Z), 			% rule 1, goal 1
+	ib_1(Z, Y). 			% rule 1, goal 2
+ib_1(X, Y) :- bigger(X, Y). % rule 2
+% Die Lösung funktioniert, jedoch verwendet der resultierende Suchbaum viel mehr Backtracking - ineffizienter. Dies kann also die Effizienz von Prozeduren verschlechtern.
+
+% Rule 1 und Rule 2 vertauscht (Reihenfolge von Regeln und Zielen vertauscht):
+bigger(elephant, horse). 	% fact 1
+bigger(horse, dog). 		% fact 2
+bigger(horse, sheep). 		% fact 3
+ib_2(X, Y) :- 				% rule 1
+	ib_2(Z, Y), 			% rule 1, goal 1
+	bigger(X, Z). 			% rule 1, goal 2
+ib_2(X, Y) :- bigger(X, Y). % rule 2
+% Kann die Anfragen nicht mehr beantworten: ERROR Out of local stack. Es wird endlos ib_2(_X, dog) aufgerufen bei der Anfrage von ib_2(elephant, dog). Änderung der Reihenfolge von Regeln und Zielen kann zu unbrauchbaren Programmen führen.
+\end{lstlisting}
+
+Es sollten zuerst immer die einfachen Dinge probiert werden. Typischerweise zuerst die Rekursionsbasis (einfacher Fall) und dann erst den allgemeinen Fall. 
+
+\newpage
+\section{Konjunktion und Diskonjunktion}
+Beim definieren von Regeln wird nach :- die Ziele definiert. Einzelne Ziele werden dabei durch Komma getrennt, welches eine AND-Verknüpfung also einer Konjunktion entsprechen. Die Regel wird mit dem Punkt-Operator abgeschlossen. Auch Anfragen können verUNDet werden. Disjunktion (ODER) können mit Semikolon realisiert werden. Konjunktion und Disjunktion sind handelsübliche Prädikate. 
+
+\begin{lstlisting}[caption=Disjunktion]
+rich(tom). 			% fact 1
+nice(mary). 		% fact 2
+interesting(X) :- 	% rule 1
+	rich(X); 		% rule 1, goal 1 OR
+	nice(X).		% rule 1, goal 2
+
+?- interesting(tom).
+true .
+?- interesting(mary).
+true.
+
+?- X = a; X = b.
+X = a 				% pressing ;
+X = b.
+
+% Best Practices: Wir verwenden keine Disjunktion. Denn diese sind immer equivalent zu zwei Regeln mit den beiden Operanden der Disjunktion. Programme sind so einfacher zu verstehen.
+interesting1(X) :- rich(X); nice(X). 	% disjunction
+interesting2(X) :- rich(X). 			% rule 1
+interesting2(X) :- nice(X). 			% rule 2
+\end{lstlisting}
+
+\newpage
+\section{CUT-Operator}
+Das Backtracking ist für Prolog charakteristisch. Dies kann aber oft zu Ineffizienzen führen. Prolog verschwendet Zeit und Speicher für Dinge die nirgends hinführen. Manchmal wäre etwas Kontrolle wünschenswert, dabei geht aber die vollständige deklarative Bedeutung verloren.
+
+Mittels dem CUT-Operator \emph{!/0} kann Einfluss aufs Backtracking genommen werden. Dieser nimmt kein Argument, ist immer erfüllt und bindet die bisherige Wahl innerhalb der aktuellen Klausel.
+
+\begin{lstlisting}[caption=Beispiel CUT-Operator]
+% Wenn in folgender Regel der CUT erreicht wird. Bindet uns das zur linken Seite, nämlich zur spezifischen Klausel p und zu der Wahl b. Es bindet uns jedoch nicht zur rechten Seite - im Beispiel zur Wahl c.
+p(X):- b(X), !, c(X).
+\end{lstlisting}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.6\linewidth]{fig/prolog-suchbaum-cut}
+\caption{Prolog Suchbaume mit und ohne CUT}
+\label{fig:prolog-suchbaum-cut}
+\end{figure}
+
+Wenn CUTS implementiert werden, wird zwischen RED-CUT und GREEN-CUT unterschieden. GREEN-CUTS verändern die deklarative Bedeutung von Programmen nicht. Damit können Programme optimiert werden. RED-CUTS verändern nicht nur die prozedurale Bedeutung sondern auch die deklarative. RED-CUTS mit Sorgfalt verwenden, diese können nämlichen zu subtilen Programmierfehlern führen und können schwer zu verstehen sein.
+
+
 \section{Negation von Prädikaten}
 
 In Prolog kann eine Negation entweder mit einem Cut-Operator (\verb|!/0|) kombiniert mit \verb|fail/0| oder mit \verb|not/1| ausgedrückt werden. Als Beispiel verwenden folgende Aussage \textit{Mary mag alle Tiere ausser Schlangen}. Listing \ref{lst:negation} zeigt das obengennante Beispiel.
