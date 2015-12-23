@@ -196,8 +196,164 @@ Das Prolog-System versucht die Anfrage zu beweisen. Dazu versucht es die Fakten 
 \end{figure}
 
 \section{Deklarative vs. Prozedurale Bedeutung}
-Grundsätzlich reicht es in Prolog die deklarative Bedeutung (WAS - Problem-Beschreibung - deklarativ-logisch) anzugeben und es muss nicht die prozedurale Bedeutung (WIE - Beschreibung der Problemlösung - imperativ) definiert werden. Der deklarative Weg reicht leider nicht immer. Aus Ausführungseffizienzgründen gibt es in Prolog prozedurale Konstrukte wie Endrekursion, Assertions, Cut-Operator \& Negation.
+Grundsätzlich reicht es in Prolog die deklarative Bedeutung (WAS - Problem-Beschreibung - deklarativ-logisch) anzugeben und es muss nicht die prozedurale Bedeutung (WIE - Beschreibung der Problemlösung - imperativ) definiert werden. Der deklarative Weg reicht leider nicht immer. Aus Ausführungseffizienzgründen gibt es in Prolog prozedurale Konstrukte wie Endrekursion, Assertions, Cut-Operator \& Negation. Conclusion: Wenn das Problem modelliert ist, ist es (grundsätzlich) gelöst. Einzige Einschränkung ist die Effizienz, welches in der prozeduralen Programmierung gesteuert werden kann. Oft es auch nicht einfach das Problem zu modellieren. Übung macht den Meister wie bei guter OO-Modellierung.
 
+\section{Typische Prolog-Poblemstellungen}
+Mit Prolog lassen sich auf nette Art und Weise folgende Problemstellungen lösen: Kreuzworträtsel, Färben von Karten, Zahlenrätsel, Sudoku, Spracherkennung, Expertensysteme u.v.a.m.
+
+\subsection{Kreuzworträtsel}
+\begin{enumerate}
+	\item Jedes leere Feld muss mit einem Identifier markiert werden, welcher als Platzhalter für einen Buchstaben dient.
+	\item  In der Wissensdatenbank müssen alle möglichen Wörter definiert werden.
+	\item Regeln für alle Wörter aus dem Kreuzworträtsel definieren.
+	\item Anfrage formulieren und ausführen.
+\end{enumerate}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=1\linewidth]{fig/prolog-kreuzwortraetsel}
+\caption{Prolog: Kreuzworträtsel lösen}
+\label{fig:prolog-kreuzwortraetsel}
+\end{figure}
+
+\subsection{Karten färben}
+Es liegt eine fixe Anzahl an unterschiedlichen Farben vor. Nun sollen die Länder auf einer Karte eingefärbt werden, wobei angrenzende Länder unterschiedlich gefärbt sein sollen. 
+\begin{enumerate}
+	\item Definition von Prädikaten, welche Farben nebeneinander sein dürfen.
+	\item Definition von Ländern, welche nebeneinander liegen. Da diese alle um die gleiche Zeit erfüllt sein müssen, werden diese als Konjunktion definiert.
+\end{enumerate}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=1\linewidth]{fig/prolog-karten-faerben}
+\caption{Prolog: Karten färben}
+\label{fig:prolog-karten-faerben}
+\end{figure}
+
+\newpage
+\section{Operatoren und Prädikate}
+Operatoren und Prädikate sind dasselbe. Es sind einfach zwei unterschiedliche Schreibweisen. Grundsätzlich gibt es nur Prädikate, welche aber auch als Operatoren verwendet werden könne.
+
+\begin{lstlisting}[caption=Prädikat >/2]
+?- 3 > 7. % infix operator style for predicate >/2
+false.
+?- >(3, 7). % >/2 predicate, "regular style"
+false.
+\end{lstlisting}
+
+Mittels dem Prädikat \emph{op/3} op(+Precedence, +Type, :Name) können Prädikate als Operatoren deklariert werden.
+
+\begin{lstlisting}[caption=is\_bigger/2 als Operator]
+?- op(1150, xfx, is_bigger). % declare new operation
+true.
+?- elephant is_bigger dog. % use our new operation
+true.
+\end{lstlisting}
+
+Die \textbf{Präzedenz} (Operatorrangfolge) von einem Operator definiert, wie stark ein Operator seine Operanden bindet. Eine tiefere Präzedenz bedeutet eine stärkere Bindung. Dadurch wird definiert, wann welcher Operator auf seine Operanden angewendet wird. In SWI-Prolog wird dieser Wert zwischen 1 und 1200 angegeben. Der Haupt-Funktor von einem Term ist der Operator mit der höchsten Präzedenz. Der \textbf{Operator-Typ} definiert die relative Reihenfolge von Operator f und Operanden x und y. Es gibt drei Typen:
+
+\begin{description}
+	\item[Infix] xfx, xfy, yfx. Operator ist zwischen den beiden Operanden.
+	\item[Präfix] fx, fy. Operator f ist vor dem Operand.
+	\item[Postfix] xf, yf. Operator f ist nach dem Operand.	
+\end{description}
+
+Mit x und y wird die Präzedenz der Operanden einer Operation f festgelegt. X repräsentiert einen Operanden, dessen Präzedenz strickt kleiner ist als die Präzedenz vom Operator f. Y repräsentiert einen Operanden, dessen Präzedenz kleiner oder gleich derjenige vom Operator f ist. Dies dient schlussendlich dazu, dass auch folgendes korrekt ausgewertet wird: \emph{1 - 2 - 3 }. 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.7\linewidth]{fig/prolog-operatoren}
+\caption{Prolog: Operatoren}
+\label{fig:prolog-operatoren}
+\end{figure}
+
+\newpage
+In der API-Dokumentation von Prolog werden folgende Zeichen eingesetzt:
+\begin{description}
+	\item[-] Operand sollte ungebunden (d.h. nicht instanziiert) sein. Also eine Variable (Wert wird durch Prädikat zugewiesen).
+	\item[+] Operand sollte gebunden (d.h. instanziiert) sein. Also eine Zahl, ein Atom oder ein gebundener zusammengesetzter Term (Term wird vom Prädikat gebraucht).
+	\item[?] Operand kann gebunden oder ungebunden sein.
+\end{description}
+
+\subsection{Arithmetische Operatoren}
++ Addition, - Subtraktion, * Multiplikation, / Division, ** Potenz, // Ganzzahldivision, mod Modulo (Rest bei Ganzzahldivision). Wenn versucht wird \emph{X = 1 + 2} zu berechnen, gelingt dies nicht, da der Gleich-Operator dem Matching dient. Dafür muss der \emph{is/2}-Operator verwendet werden \emph{(X is 1 + 2)}. Der Ausdruck \emph{(8 is X)} würde ein Runtime-Fehler geben. Die Definition von dem \emph{is/2-Operator} ist folgende: \emph{-Number is +Expr}.
+
+\begin{lstlisting}[caption=Arithmetische Terme]
+?- D is 5/2. % division
+D = 2.5.
+?- I is 5//2. % integer division
+I = 2.
+?- Z is 5 mod 2. % modulo (remainder of integer div.)
+Z = 1.
+?- P is 2 ** 4. % power
+P = 16.
+?- C is cos(0). % cosine
+C = 1.0.
+?- S is sqrt(9). % square root
+S = 3.0.
+\end{lstlisting}
+
+\subsection{Vergleichsoperatoren}
+> grösser als, < kleiner als, >= grösser-gleich, =< kleiner-gleich, =:= Gleichheit, =\= Ungleichheit.
+
+\begin{lstlisting}[caption=Terme mit Vergleichen]
+?- 55 > 6. % is 55 is greater than 6?
+true.
+?- 88 =< 77. % is 88 smaller or equal than 77?
+false.
+?- 1 + 2 = 2 + 1. % Attention: matching!
+false. % 1+2 does not match 2+1
+?- 1 + 2 =:= 2 + 1. % is 1+2 equal to 2+1?
+true.
+?- 44 =\= 42 + 1. % is 44 unequal to 42+1?
+true.
+\end{lstlisting}
+
+\newpage
+\section{Rekursion}
+Prolog Prädikate können rekursiv definiert sein. Ein Prädikat ist rekursiv definiert, falls sich eine oder mehrere Regeln in ihrer Definition auf sich selber beziehen. Dies wird in Prolog häufig eingesetzt.
+
+\begin{lstlisting}[caption=Beispiel Rekursion]
+is_bigger(X, Y) :- bigger(X, Y). % simple case - Rekursionbasis
+is_bigger(X, Y) :- bigger(X, Z), is_bigger(Z, Y). % general case - Rekursionsvor.
+\end{lstlisting}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.7\linewidth]{fig/prolog-suchbaum-rekursion}
+\caption{Prolog: Rekursions-Suchbaum}
+\label{fig:prolog-suchbaum-rekursion}
+\end{figure}
+
+\begin{lstlisting}[caption=Fakultät]
+fak(0, 1). 				% simple case
+fak(N, F) :- 			% general case
+	N > 0, 				% argument test
+	N1 is N - 1, 		% evaluate N-1
+	fak(N1, F1), 		% recursive call
+	F is N * F1. 		% sum up
+
+?- fak(5, X). X = 120 .
+?- fak(4, 24). true.
+?- fak(X, 24). ERROR: >/2: Arguments are not sufficiently instantiated
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Fibonacci]
+% Naive Implementierung! Optimierung mittels Endrekursion und Assertions.
+fib(0, 0).
+fib(1, 1).
+fib(N, F) :-
+	N > 1,
+	N1 is N - 1,
+	N2 is N - 2,
+	fib(N1, F1),
+	fib(N2, F2),
+	F is F1 + F2.
+
+?- fib(7, X). X = 13 .
+?- fib(6, 8). true .
+?- fib(X, 8). ERROR: >/2: Arguments are not sufficiently instantiated (Da brauchen wir CLP!)
+\end{lstlisting}
 
 \section{Negation von Prädikaten}
 
