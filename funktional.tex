@@ -241,6 +241,114 @@ Mittels \emph{if} können Selektionen realisiert werden. Der \emph{else}-Teil is
 # Scheme hat einen vordefinierte Struktur für den Punkt: posn (x y)
 \end{lstlisting}
 
+\section{Listen}
+Das Problem von Strukturen ist, dass nur eine feste Zahl von Daten gespeichert werden können. Wir benötigen Listen. Die Elemente in \textbf{rekursiven Datenstrukturen} können Elemente der selben Datenstruktur beinhalten. Ein\textbf{Rekursionsanker} (Rekursionbasis) wird benötigt, um eine endliche Datenstruktur zu bekommen.
+Die Definition einer Liste in Scheme ist rekursiv. Eine Liste ist leer oder besteht aus dem ersten Element und den Rest, welche wiederum eine Liste ist. Listen können beliebige Datentypen enthalten (Mischung möglich). Zudem können sie auch beliebig verschachtelt sein.
+
+\begin{lstlisting}[caption=Listen]
+% Konstruktor. Argument 1: Element, Argument 2: Liste.
+(cons <element> empty)
+(cons <element> (cons ... (cons <element> empty)))
+
+> (cons "Bob" (cons "Tom" (cons "John" empty)))
+(list "Bob" "Tom" "John")
+
+% List statt cons (handlicher) (wertet Argumente aus)
+(list <element1> ... <elementN>)
+
+> (list 1 2 3)
+(list 1 2 3)
+> (list (list 'a 1) (list 'b 2))
+(list (list 'a 1) (list 'b 2))
+
+% Quote statt list (noch handlicher) (wertet Argument nicht aus)
+'(1 2 3) % ist die Kurzform für (list 1 2 3)
+'((1 2) (3 4) (5 6)) % steht für (list (list 1 2) (list 3 4) (list 5 6))
+'(a b c) % steht für (list 'a 'b 'c)
+
+% Listen Funktionen
+empty % Leere Liste
+
+(first <list>) % Selektor für das erste Element (früher car - IBM Relikt)
+
+(rest <list>) % Selektor für den Rest (früher cdr - IBM Relikt)
+
+% Prädikatsfunktionen
+> (list? empty) % Prüft ob es eine Liste ist
+true
+> (cons? empty) % Prüft ob eine Liste NICHT leer ist
+false
+> (empty? empty) % Prüft ob eine Liste leer ist
+true
+
+% Listen mit Namen
+(define list2 (cons 1 (cons 2 empty)))
+
+% Liste umdrehen
+(reverse <list>)
+
+% Länge einer Liste
+(length <list>)
+
+% Listen aneinander hängen
+(append <list1> <list2> ...)
+\end{lstlisting}
+
+\subsection{Rekursion über Listen}
+Da Listen \emph{rekursive Datentypen} sind, haben die Funktionen, welche auf Listen operieren, eine besondere Struktur. Das folgende Funktionsschema ist wichtig. Es funktioniert aber nicht, wenn die Elemente der Liste ungleich behandelt werden müssen!!
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.7\linewidth]{fig/scheme-recursive-function-schema}
+\caption{Verarbeiten von rekursiven Datentypen}
+\label{fig:scheme-recursive-function-schema}
+\end{figure}
+
+\begin{lstlisting}[caption=Funktionen auf listen]
+% Summieren
+(define (sum a-list)
+	(cond ((empty? a-list) 0)
+	(else
+	(+ (first a-list) (sum (rest a-list))))))
+	
+> (sum (list 3 2 1))
+6
+
+% Elemente verdoppeln
+(define (redouble a-list)
+	(if (empty? a-list)
+		empty
+		(cons
+			(* 2 (first a-list)) (redouble (rest a-list)))
+))
+
+>(redouble (list 3 2 1))
+(list 6 4 2)
+
+% Sortieren von Zahlen
+define (insert value a-list)
+	(cond
+		((empty? a-list) (list value))
+		((<= value (first a-list)) (cons value a-list))
+		(else (cons (first a-list)
+			(insert value (rest a-list))))
+))
+
+
+(define(sort-by-insert num-list)
+	(cond
+		((empty? num-list) empty)
+		(else (insert (first num-list)
+			(sort-by-insert (rest num-list))))
+))
+
+> (sort-by-insert '(12 54 32 21))
+(list 12 21 32 54)
+\end{lstlisting}
+
+\subsection{Rekursive Funktionen}
+Wenn eine Funktion sich selber aufruft, ist sie rekursiv. Sie beinhaltet eine Verzweigung. Ein Zweig terminiert die Rekursion der andere ruft die Funktion selber wieder auf. Bei \textbf{wohldefinierte Funktionen} terminiert die Auswertung. In den obigen Beispielen wurden strukturelle Rekursionen verwendet. Die Struktur der Funktion folgt nämlich der Struktur der Datenstruktur. Diese sind stets wohldefiniert. 
+
 \section{Funktionen höherer Ordnung}
 
 In der funktionalen Programmierung werden grundsätzlich zwei Arten von Funktionen unterschieden:
