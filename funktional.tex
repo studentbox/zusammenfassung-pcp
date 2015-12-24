@@ -93,6 +93,154 @@ Beim Aufruf von Funktionen müssen die aktuellen Parameter in Anzahl, Datentyp (
 \section{Funktionale Modellierung}
 Ein OO-Entwickler muss nun etwas anders denken. Es gibt quasi immer eine Hauptfunktion, welche Hilfsfunktionen für Teilberechnungen nutzt. Hierarchisches Denken ist dabei gefordert.
 
+\section{Prädikate}
+True und false sind elementare Prädikate. Ein Prädikat ist ein Ausdruck der zu true oder false evaluiert. Wie Vergleichsoperatoren und boolesche Verknüpfungen.
+\begin{lstlisting}[caption=Prädikate]
+> (< 3 1)
+false
+> (<= 5 5)
+true
+>(<= 3 4 5 5)
+true
+> (< 3 4 5 5)
+false
+
+% AND-Verknüpfungen werden von links nach rechts ausgwertet. Evaluiert ein Ausdruck links zu false, dann wird die Auswertung beendet. Falls ein Ausdruck keinen boolschen Wert zurückgibt, kommt es zum Laufzeitfehler.
+> (and (= 23.3 23.3) (< 5 7))
+true
+> (and true (+ 3 5))
+and: question result is not true or false: 8
+
+> (define x 0)
+> (and (not (= x 0)) (< (/ 1 x) 1))
+false
+
+% OR-Verknüpfungen werden nur bis zum ersten true ausgwertet.
+> (or (= 23.3 23.3) (< 5 7))
+true
+
+% Boolesche Vergleiche müssen so gemacht werden, der = Operator ist nur für Zahlen
+(boolean=? <expr1> <expr2>)
+\end{lstlisting}
+
+\subsection{Prädikatsfunktionen}
+Diese liefern immer einen Wahrheitswert zurück. Der Funktionsname endet mit einem Fragezeichen.
+\begin{description}
+	\item[Test auf Zahlen] integer? real? rational? complex? odd? even? zero? negative? positive?
+	\item[Test auf Basistypen] boolean? number? char? null? string? symbol? procedure?
+	\item[Test auf Gleichheit] string=? null=? equal? eq? eqv? char=?
+\end{description}
+
+\begin{lstlisting}[caption=Prädikatsfunktionen]
+> (string? "Hallo ?")
+true
+> (string? "333")
+true
+> (string? 333)
+false
+> (number? 333)
+true
+> (number? "333")
+false
+\end{lstlisting}
+
+Es können eigene Prädikate definiert werden \emph{(define <identifier?> <expression>)}. Das Fragezeichen muss angehängt werden. Ausserdem muss diese einen booleschen Wert zurückliefern.
+
+\section{Symbole}
+Nebst Zahlen und booleschen Werten gibt es Symbole. Symbole sind eine Sequenz von Zeichen angeführt von einem einfachen Anführungszeichen. Es gibt nur eine Operation auf diesem Datentyp \emph{symbol=?}. Symbole sind atomar und können nicht zerlegt werden. Im Gegensatz zu Strings werden sind keine Manipulationen möglich, der Vergleich ist sehr effizient und haben gewisse Einschränkung in der Zeichenwahl.
+
+\begin{lstlisting}[caption=Symbole]
+> (symbol=? 'Hallo 'Hallo)
+true
+> (symbol=? 'Hallo 'ABC)
+false
+> (symbol=? 1 2)
+symbol=?: expects a symbol as 1st argument, given 1
+\end{lstlisting}
+
+\section{Fallunterscheidung}
+Mittels \emph{cond} können Fallunterscheidungen realisiert werden. Es dürfen beliebig viele Klausen verwendet werden und die letzte Klause \emph{else} ist optional. Die Klauseln müssen in Klammern eingeschlossen sein. Die Abarbeitung ist von oben nach unten (Reihenfolge wichtig). Achtung: Wenn kein Fall zu true auswertet, gibt es einen Laufzeitfehler. Wenn \emph{else} nicht weggelassen wird, passiert das nie, den \emph{else} ist immer \emph{true}. 
+
+\begin{lstlisting}[caption=Fallunterscheidung]
+(cond (<cond clause1> <expr1>)
+	(<cond clause2> <expr2>)
+	...
+	(else <last-expr>))
+	
+(define (grade score)
+	(cond
+		((not (number? score)) "Zahl eingeben!")
+		((not (integer? score))
+			"Ganze Zahl 0 <= x <= 15 eingeben!")
+		((<= 13 score 15) "ausgezeichnet")
+		((<= 10 score 12) "sehr gut")
+		((<= 7 score 9) "gut")
+		((<= 4 score 6) "ausreichend")
+		((<= 1 score 3) "nicht erfüllt: Nachbesserung")
+		((= 0 score) "nicht erfüllt")
+		(else "Ganze Zahl 0 <= x <= 15 eingeben!")
+	)
+)
+\end{lstlisting}
+
+\newpage
+\section{Selektion}
+Mittels \emph{if} können Selektionen realisiert werden. Der \emph{else}-Teil ist nicht optional. \emph{cond} und \emph{if} sind gleichmächtig. Die eine Form kann in die andere Form transformiert werden.
+
+\begin{lstlisting}[caption=Selektion]
+(if (<test>) <then-expr> <else-expr>)
+
+# Speziell: if verwendet nicht die strikte Auswertung, sondern die lazy evaluation.
+
+(define (test a b)
+	(if (= a 0) 1 b))
+	
+> (test 0 (/ 1 0))
+/: division by zero	
+
+# Und nun if selber:
+>(if (= 0 0) 1 (/ 1 0))
+1
+\end{lstlisting}
+
+\section{Datentyp: Struktur}
+
+\begin{lstlisting}[caption=Strukturen]
+# Definition
+(define-struct <typename> (<field1> ... <fieldN>))
+
+# Durch die Defintion von Strukturen, kommen drei weitere Typen von Funktionen mit
+
+# Konstruktor (sind selbstauswertend)
+(make-<typename> <value1>...<valueN>)
+
+# Prädikatsfunkion
+(<typename>? <objekt>)
+
+# Feld-Selektor für jedes Feld
+(<typename>-<field> <objekt>)
+
+# Der Variable gibt man schlauerweise noch einen Namen
+(define <name> (make-<typename> <value1>...<valueN>))
+
+# Beispiele
+(define-struct member (lastname firstname number))
+(define-struct point (x y)) ; Typ-Definition
+(make-point 7 3) ; Konstruktor-Aufruf
+(define p1 (make-point 3 4)) ; Variablen-Definition
+
+> (point? p1)
+#true
+> (point-x p1)
+3
+> (point-y p1)
+4 >
+
+# P.S.: Es können keine Typendefintionen definiert werden. In Scheme kommentiert man die Datentypen in den Strukturen.
+
+# Scheme hat einen vordefinierte Struktur für den Punkt: posn (x y)
+\end{lstlisting}
+
 \section{Funktionen höherer Ordnung}
 
 In der funktionalen Programmierung werden grundsätzlich zwei Arten von Funktionen unterschieden:
