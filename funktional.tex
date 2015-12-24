@@ -1,4 +1,97 @@
 \chapter{Funktionale Programmierung (Scheme)}
+Scheme folgt dem deklarativ-funktionalem Programmierparadigma. Nachfolgend einige Beispiele von funktionale Programmiersprachen: LISP (Common Lisp, Scheme, Clojure), MetaLanguage (ML) Familie (SML, OCaml, F\#) und Haskell.
+
+LISP (LISt Processing) ist durch das Lambda Kalkül inspiriert und ist homoikonisch. Homoikonizität bedeutet Selbst-Abbildbarkeit oder Selbst-Repräsentiertbarkeit. Dies ist eine Eigenschaft von Programmiersprachen, dass Programme gleichzeitig Datenstrukturen derselben Sprachen sind. In solchen Sprachen ist es einfach Programme zu schreiben, die Programme schreiben (Turingmaschine). (In LISP ist jedes Programm eine Liste)
+
+\section{Prinzipien der funktionalen Programmierung}
+Im Zentrum stehen Funktionen und die Anwendung von Funktionen:
+\begin{itemize}
+	\item Rekursion statt Schleifen
+	\item Keine Seiteneffekte (referentielle Transparenz)
+	\item Funktion als gleichberechtigte Datenobjekte
+	\item Verwendung von einer Funktions-Implementierung für verschiedene Typen (Polymorphismus)
+	\item Programme sind kürzer, klarer, besser zu warten, zuverlässiger, schneller zu erstellen
+\end{itemize}
+Aufgaben werden in kleinere Aufgaben zerlegt (Dekomposition) um diese schlussendlich wieder zusammenzuführen (Komposition).
+
+\section{DrRacket}
+DrRacket ist eine integrierte Entwicklungsumgebung (IDE) für den Scheme-Dialekt Racket. Es können verschiedene, skalierbare Scheme-Dialekte ausgeführt werden. Hat eine REPL Konsole (Read-Evalute-Print Loop) integriert. Zudem gibt es einen Stepper bei dem der Funktionsaufruf verfolgt werden kann.
+
+\section{Syntax}
+\begin{description}
+	\item[Zahlen] Primitive atomare Ausdrücke. Nebst rationalen Zahlen können auch reelle, irrationale und komplexe Zahlen definiert werden.
+	\item[Bool] Es gibt true und false. Alternative Darstellungen: \#t, \#f, \#true, \#false.
+	\item[Operatoren] Scheme hat eingbaute mathematische Operatoren, welche auch als PRIMS-OPS (primitve operations) bezeichnet werden. Beispiele: +, -, *, /, quotient, remainder, expt, modulo, abs, max, min, sin, tan, exp ...
+	\item[Form] Fast alles in folgender Form deklariert werden: \emph{(<operator> <operand1> <operand2> ...)}. Dabei ist die Reihenfolge der Auswertung nicht festgelegt! Wichtig: Diese Notation nennt man \textbf{Form}! Formen werden ausgewertet.
+	\item[Klammern] Die Klammern sind Fluch und Segen zugleich. Die Operatorrangfolge kann selbst definiert werden. Nachteil: Hohe Zahl der Klammern. Gewisse Scheme-Implementation wie Racket unterstützen auch eckige Klammern. Man erhält etwas mehr Übersicht.
+\end{description}
+
+\begin{lstlisting}[caption=Simple mathematische Operationen]
+> (+ 13 52)
+65
+> (- 26 33)
+-7
+> (/ 5 10)
+0.5
+> (* 13 5)
+65
+> (* 5 2 3)
+30
+> (/ 10 2 5)
+1
+> (+ 1 (* 2 8) (* 4 4) (* 8 2) (* 1 16))
+65
+\end{lstlisting}
+
+\section{Auswertungsregeln}
+Es ist klar, dass Zahlen und boolsche Werte selbst auswertend sind und ihren Wert zurückgegeben. Ein Name gibt den Wert zurück mit welchem dieser in der Umgebung assoziiert ist. Die eingebauten Operatoren geben die Sequenz an Instruktionen zurück.
+Wenn die Dinge kombiniert werden, dann wird rekursiv ausgewertet. Es werden alle Unterausdrücke in \emph{beliebiger} Form ausgewertet. Wichtig zu wissen ist, dass nicht definiert ist, welcher Operand pro Form in welcher Reihenfolge ausgewertet ist. Also nicht links nach rechts wie bspw. in Java.
+
+\subsection{Funktions-Auswertung}
+Bei einer \textbf{strikten Auswertung} werden alle Argumente zuerst ausgewertet bevor die Funktion aufgerufen wird (Scheme). Eine andere Möglichkeit wäre die \textbf{lazy evaluation}, wobei die unausgewerteten Ausdrücke übergeben werden. Die Auswertung erst dann, wenn die Werte benötigt werden.
+
+\newpage
+\section{Namen definieren}
+\begin{lstlisting}[caption=Namen definieren]
+(define <identifier> <expression>)
+% <identifier> Beliebiger Name auch Sonderzeichen. Per Default case-sensitive, in DrRacket ausschaltbar.
+% <expression> Beliebiger Ausdruck - Konstante, Variable, Funktionsaufruf, ...
+
+> (define pi 3.14159)
+pi: this name was defined previously and cannot be redefined - pi bereits eine Scheme Konstante
+> (define PI 3.14159)
+
+% Define wird speziell ausgewertet. Dabei wird der zweite Ausdruck nicht ausgewertet (im Beispiel pi). Zudem ist der Rückgabewerte von define nicht spezifiziert.
+\end{lstlisting}
+
+\section{Funktionen}
+Beim Aufruf von Funktionen müssen die aktuellen Parameter in Anzahl, Datentyp (implizit) und Reihenfolge mit den formalen Parameter übereinstimmen. Es gibt keine Start-Funktion (kein main).
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\linewidth]{fig/scheme-function-definition}
+\caption{Scheme: Funktionen definieren}
+\label{fig:scheme-function-definition}
+\end{figure}
+
+\begin{lstlisting}[caption=Beispiel Funktionen]
+(define (area-of-disk r) (* PI (sqr r)))
+
+> (area-of-disk 5)
+78.53975
+
+> (- (area-of-disk 5) (area-of-disk 3))
+50.26544
+
+(define (area-of-ring outer inner)
+	(- (area-of-disk outer) (area-of-disk inner)))
+
+> (area-of-ring 5 3)
+50.264
+\end{lstlisting}
+
+\section{Funktionale Modellierung}
+Ein OO-Entwickler muss nun etwas anders denken. Es gibt quasi immer eine Hauptfunktion, welche Hilfsfunktionen für Teilberechnungen nutzt. Hierarchisches Denken ist dabei gefordert.
 
 \section{Funktionen höherer Ordnung}
 
