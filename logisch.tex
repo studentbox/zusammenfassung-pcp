@@ -728,6 +728,60 @@ X = 2,
 Y = 1.
 \end{lstlisting}
 
+\section{Sudoku}
+
+In Prolog kann mittels CLP relativ einfach beliebige Sudokus gelöst werden. Listing \ref{lst:sudoku} zeigt das gesamte Programm.
+
+\begin{lstlisting}[language=Prolog, caption=Sudoku, label=lst:sudoku]
+:- use_module(library(clpfd)).
+
+sudoku(Rows) :-
+	% Fasst alle Listen in Rows zu einer gesamten Liste Vs zusammen
+	append(Rows, Vs), 
+	% Domäne festlegen
+	Vs ins 1..9,
+	% Wendet all_distinct auf alle Elemente der Liste Rows an (nur eine Ziffer pro Zeile)
+	maplist(all_distinct, Rows),
+	% Transponiert die Liste Rows zu Liste Columns
+	transpose(Rows, Columns),
+	% Wendet all_distinct auf alle Elemente der Liste Columns an (nur eine Ziffer pro Spalte)
+	maplist(all_distinct, Columns),
+	% Weist die 9 Zeilen in Rows den Variablen A-I zu
+	Rows = [A, B, C, D, E, F, G, H, I],
+	% Prüft ob nur eine Ziffer pro Block. Wird 3x aufgerufen!
+	blocks(A, B, C), 
+	blocks(D, E, F), 
+	blocks(G, H, I),
+	% Wendet label auf alle Elemente der Liste Rows an (Lösungssuche beginnt)
+	maplist(label, Rows).
+
+blocks([], [], []).
+% Prüfe die ersten drei Elemente der drei Zeilen und danach der Rest rekursiv
+blocks([A, B, C|Bs1], 
+	   [D, E, F|Bs2], 
+	   [G, H, I|Bs3]) :-
+	all_distinct([A, B, C, D, E, F, G, H, I]),
+	blocks(Bs1, Bs2, Bs3).
+\end{lstlisting}
+
+\section{HTTP/Json}
+
+Prolog bietet diverse Bibliotheken um HTTP-Anfragen abzuschicken. Listing \ref{lst:http} zeigt ein Beispiel für eine GET- bzw. POST-Anfrage.
+ 
+\begin{lstlisting}[language=Prolog, caption=HTTP, label=lst:http]
+?- use_module(library(http/http_client)).
+?- use_module(library(http/http_json)).
+
+?- http_get('http://wherever.ch/pcp.txt', Reply, []).
+Reply = 'Hallo zusammen! Dies ist eine Test-Datei fuer das PCPModul, abgelegt unter http://wherever.ch/pcp.txt. - Prolog rockt! :-) MfG, Ruedi Arnold'.
+
+?- http_post('http://localhost:16316/test',json(['say hi to http post']), SolutionResponse, []).
+SolutionResponse = 'PCPProblemProvider server up and running at http://localhost:16316/, reached via HTTP POST - POSTed data: ["say hi to http post" ]'.
+\end{lstlisting}
+
+JSON-Objekte werden in Prolog in Terme der Form \verb|json([...])| abgepackt, wobei in diese Prolog-Liste jeweils Paare von \verb|Name=Value| kommen (z.B. \verb|{ institution: hslu, dept: t&a }| wird zu \verb|json([institution=hslu, dept=t&a])|).
+\verb|json()| ist also praktisch ein \textit{Markier}-Prädikat (marker predicate) und bietet sonst keine Funktionalität.
+
 \section{Eingebaute Prädikate}
 
 \begin{description}
