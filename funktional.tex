@@ -347,13 +347,137 @@ define (insert value a-list)
 \end{lstlisting}
 
 \section{Typen von Rekursionen}
-Wenn eine Funktion sich selber aufruft, ist sie rekursiv. Diese beinhaltet eine Verzweigung. Ein Zweig terminiert die Rekursion der andere ruft die Funktion selber wieder auf. Bei \textbf{wohldefinierten rekursiven Funktionen} terminiert die Auswertung. In den obigen Beispielen wurden strukturelle Rekursionen verwendet. Die Struktur der Funktion folgt nämlich der Struktur der Daten. Diese sind stets wohldefiniert!
+Wenn eine Funktion sich selber aufruft, ist sie rekursiv. Diese beinhaltet eine Verzweigung. Ein Zweig terminiert die Rekursion der andere ruft die Funktion selber wieder auf. Bei \textbf{wohldefinierten rekursiven Funktionen} terminiert die Auswertung. Nebst Listen sind auch natürliche Zahlen rekursive Datenstrukturen. Wenn ich bei 100 beginne immer 1 abzuziehen, bin ich irgendwann mal bei 0.
 
 \subsection{Strukturelle Rekursion}
+In den obigen Beispielen wurden strukturelle Rekursionen verwendet. Die Struktur der Funktion folgt nämlich der Struktur der Daten. Diese sind stets wohldefiniert! Die Eingabedaten wurden in ihre direkten strukturellen Komponenten zerlegt. Die rekursive Funktion wird so oft aufgerufen wie es Elemente in der Liste gibt. Folgt dem generellen Funktionsschema für rekursive Datenstrukturen. Jedoch lassen sich nicht alle Probleme damit lösen und ist oft nicht immer die beste Lösung. Beispiel:
+
+\begin{lstlisting}[language=Lisp, caption=Strukturelle Rekursion - Beispiel Maximumssuche]
+(define (list-max a-list)
+	(cond
+		[(empty? (rest a-list)) (first a-list)]
+		[else (cond
+		[(> (first a-list) (list-max (rest a-list)))
+			(first a-list)]
+		[else (list-max (rest a-list))])]
+))
+
+> (list-max (list 2 3 6 5 9 1))
+9
+
+; Arbeitet mit kleinen Listen schnell, aber auf grossen Listen sehr langsam. Problem: Die Lösung hat zwei Rekursionen - die Rekursionsaufrufe verdoppeln sich!
+\end{lstlisting}
 
 \subsection{Akkumulative Rekursion}
+Auch bekannt als strukturelle Rekursion mit Akkumulator. Der Algorithmus merkt sich Zwischenresultate (accumulate => sammeln) und übergibt diese an den nächsten rekursiven Aufruf.
+
+\begin{lstlisting}[language=Lisp, caption=Akkumulative Rekursion - Beispiel Maximumssuche]
+(define (list-max-helper a-list max-so-far)
+	(cond
+		[(empty? a-list) max-so-far]
+		[(> (first a-list) max-so-far)
+			(list-max-helper (rest a-list) (first a-list))]
+		[else (list-max-helper (rest a-list) max-so-far)]
+))
+(define (list-max a-list)
+	(list-max-helper (rest a-list) (first a-list)))
+\end{lstlisting}
+
+Bei der strukturellen Rekursion sind die Parameter beim Aufruf unverändert oder eine Stufe näher zum Basisfall. Bei der akkumulativen Rekursion ist zudem ein Akkumulator (Sammler) als Parameter vorhanden. Bei der akkumulativen Rekursion findet schlussendlich immer Hilfsfunktionen, welche von der eigentlichen Funktion umhüllt (wrapped) werden. Auch akkumulative Rekursionen können endrekursiv sein.
 
 \subsection{Generative Rekursion}
+Möchte man die Berechnung des grössten gemeinsamen Teilers (GCD) mittels akkumulative Rekursion berechnen, ist dies leider ineffizient. Der generative Ansatz verfolgt das Muster (Divide \& Conquer). Teile das Probleme in Teilprobleme. Hersche über die Teilprobleme. Kombiniere die Lösungen der Teilprobleme zur Gesamtlösung. Design von generativ rekursiven Funktionen ist eher kreativ. Die Parameter werden bei jedem Aufruf neu berechnet (generiert). Man muss auf folgendes achten: \textbf{Es ist auf korrekte Parameter und die Terminierung der Rekursion zu achten}.
+
+\begin{lstlisting}[language=Lisp, caption=Generative Rekursion - Beispiel GCD]
+; Akkumulative Rekursion
+(define (gcd-struct n m)
+	(first-divisor m n (min m n)))
+	(define (first-divisor g h i)
+	(cond
+		[(= i 1) 1]
+		[(and (= (remainder g i) 0)
+			(= (remainder h i) 0)) i]
+		[else (first-divisor g h (- i 1))]
+))
+
+; Euklid war etwas schlauer. Er verwendet eine generative Rekursion: Der trivial lösbare Fall ist m=0. Und der generative Schritt gcd-euclid mit n und (remainder n m) als Argumente. Die Argumente basieren auf keinem rekurisven Datentypen. Die Argumente werden bei jedem Aufruf neu berechnet.
+(define (gcd-euclid n m)
+	(cond
+		[(zero? m) n]
+		[else (gcd-euclid m (remainder n m))]
+))
+\end{lstlisting}
+
+\subsection{Strukturell vs. Akkmulative vs. Generativ}
+
+\begin{itemize}
+	\item Bei der strukturellen Rekursion sind die Parameter bei einem Aufruf entweder unverändert oder eine Stufe näher zum Basisfall.
+	\item Bei der akkumulativen Rekursion sind die Parameter wie oben und haben einen oder mehrere Akkumulator (Sammler) Parameter.
+	\item In der generativen Rekursion werden die Parameter bei jedem Aufruf neu berechnet (generiert); Es ist auf  korrekte Parameter und die Terminierung der generative Rekursion zu achten.
+\end{itemize}
+
+\newpage
+\section{Namensräume}
+Die mit \emph{define} definierten Namen sind global gültig. Zu jedem Zeitpunkt liegen also eine Menge von Namen mit Bindung für Werte und Funktionen vor. Diese veränderliche Bindungen bilden die \textbf{globale Umgebung}.
+	
+\subsection{Lokale Definitionen}
+Beispielsweise bei akkumulativen Rekursionen benötigt man Hilfsfunktionen, welche nicht globalisiert werden sollten. Denn es sind schnell mal viele Funktionen im globalen Namespace. Die Gefahr von Verwechslungen und Namenskonflikten wächst. Darum gibt es lokale Namen. In den lokalen Namensräumen kann auf die äusseren Namensräume zugegriffen werden. \emph{(local (<definition1>...<definitionN>) <expression>)}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.7\linewidth]{fig/scheme-local-definition}
+\caption{Lokale Definitionen}
+\label{fig:scheme-local-definition}
+\end{figure}
+
+\subsection{Lexikalisches Scoping}
+Definiert die Strategie wie ein Name einer Definition zugeordnet wird.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.7\linewidth]{fig/scheme-lexial-scoping}
+\caption{Lexial Scoping}
+\label{fig:scheme-lexial-scoping}
+\end{figure}
+
+\subsection{Scope einer Namensbindung}
+Der Scope einer Namensbindung ist der textuelle Bereich, in dem sich ein Auftreten des Namens auf diese Namensbindung bezieht.
+\begin{itemize}
+	\item Top-Level Definitionen haben globalen Scope
+	\item der Scope eines Funktionsparameters ist der Körper der Funktion
+	\item der Scope einer lokalen Definition ist der Ausdruck (letzter Operand) in der local Definition
+\end{itemize}
+
+\subsection{Lokale Variabeln}
+Im Rumpf einer Funktionsdefinition können Hilfsvariablen definiert werden. Diese sind wie die Parameter nur lokal sichtbar, machen den Code aber unübersichtlicher, bescheren uns aber weniger Seiteneffekte.
+
+\begin{lstlisting}[language=Lisp, caption=Lokale Variablen mit local]
+(define (f x y z)
+	(local
+	([define p (+ x y)]
+	[define q (+ z y)])
+	(+ (sqr p) (sqr q))
+))
+\end{lstlisting}
+
+Mit der speziellen Form \emph{let} können lokale Variablen definiert werden. \emph{Let} darf im Gegensatz zu \emph{local} nur für Variablendefinitionen verwendet werden und nicht für Funktionsdefinitionen. Es gibt noch die spezielle Form \emph{let*}, welche den gleichen Syntax wie \emph{let} hat. Sie unterscheiden sich in der Auswertung. Wobei \emph{let*} von links nach rechts auswertet und \emph{let} zuerst alle Expressions auswertet und diese erst dann den Variablen Namen zuordnet.
+
+\begin{lstlisting}[language=Lisp, caption=Lokale Variablen mit let]
+(define (f x y z)
+	(let
+	([p (+ x y)]
+	[q (+ z y)])
+	(+ (sqr p) (sqr q))
+))
+
+; Funktioniert nicht, da let zuerst die Expressions auswertet und dann erst die Zuweisung macht. Die Variable a muss vorgängig definiert werden.
+> (let ((a 10) (b (* 2 a))) (+ a b))
+a: this variable is not defined
+
+; Funktioniert, weil von links nach rechts ausgewertet wird.
+> (let* ((a 10) (b (* 2 a))) (+ a b))
+30
+\end{lstlisting}
 
 \section{Funktionen höherer Ordnung}
 
