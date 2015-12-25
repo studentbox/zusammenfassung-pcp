@@ -243,3 +243,51 @@ Produzierte Konsolenausgabe:
 ......1......2......The answer is 42..
 -> Done
 \end{lstlisting}
+
+\section{Functional Thinking}
+Als Garbage Collectoren aufkamen, gab es zu Beginn einen Aufschrei, bis alle merkten, dass diese doch Vorteile mit sich bringen. Dasselbe ist bei der funktionalen Programmierung. Der Entwickler muss nun weniger Low-Level Dinge implementieren und kann sich noch mehr um die eigene Problemstellung kümmern. In der imperativen Programmierung befasst man sich mit dem WIE (Kontrollfluss) und in der deklarativen Programmierung mit dem WAS (Fakten des Problemes).
+
+\begin{lstlisting}[language=Java, caption=Company Process - Imperativ]
+public String cleanNames(List<String> listOfNames) {
+	StringBuilder result = new StringBuilder();
+	for (int i = 0; i < listOfNames.size(); i++) {
+		if (listOfNames.get(i).length() > 1) {
+			result.append(capitalize(
+			listOfNames.get(i))).append(",");
+		}
+	}
+	return result.substring(0, result.length() - 1).toString();
+}
+private String capitalize(String s) {
+	return s.substring(0, 1).toUpperCase() +
+	s.substring(1, s.length());
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Java, caption=Company Process - Funktional]
+public String cleanNames(List<String> names) {
+	if (names == null) {
+		return "";
+	}
+	return names
+			.stream()
+			.filter(name -> name.length() > 1)
+			.map(name -> capitalize(name))
+			.collect(Collectors.joining(","));
+}
+private String capitalize(String e) {
+	return e.substring(0, 1).toUpperCase() +
+	e.substring(1, e.length());
+}
+\end{lstlisting}
+
+Das \verb|collect| ist ein spezielles \verb|reduce| wobei erstes irgendetwas zurückgegeben kann. Der Rückgabewert von \verb|reduce| ist immer vom Typ des Streams. Der Stream kann blitzschnell parallelisiert \verb|.parallelStream()| werden oder durch eine Nullbehandlung \verb|.filter(name -> name != null)| erweitert werden.
+
+\subsection{Pure Functions}
+In funktionaler Programmierung sind alle Funktionen pur (\textbf{pure Function}). Zustand existiert nur in aktuellen und formalen Parametern. Es gibt keinen (globalen) Zustand. Diese Zustandslosigkeit bietet diverse Vorteile im Bezug zu Parallelisierbarkeit, Fehlertoleranz und Robustheit.
+
+\subsection{Energien}
+Java Collections verhalten sich wie \textbf{kinetische Energie}. Sie lösen Werte sofort auf. Streams sind eher wieder \textbf{potentielle Energie}, denn diese werden gespeichert für den späteren Verbrauch. Dies ist ein gutes Beispiel für die Bedarfsauswertung (lazy evaluation).
+
+\subsection{Typische Bausteiner funktionaler Programmierung}
+Die drei Operatoren filter, map (transform) und reduce (fold/convert/collect) sind typisch für die funktionalen Programmierung. Diese findet man eigentlich immer.
