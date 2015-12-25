@@ -680,7 +680,26 @@ false. % caused by the CWA
 true. % caused by negation as failure
 \end{lstlisting}
 
-Zudem sollte man darauf achten, dass die Variable welche \verb|not(X)| übergeben wird vorher immer instanziert ist. Sonst kann es zu unerwünschten Nebeneffekten kommen.
+Zudem sollte man darauf achten, dass die Variable welche \verb|not(X)| übergeben wird vorher immer instanziert ist. Sonst kann es zu unerwünschten Nebeneffekten kommen. Wie folgendes Beispiel verdeutlicht:
+
+\begin{lstlisting}[caption=Not muss gebunden sein]
+great_food(mekong).
+great_food(eule).
+limited_seating(mekong).
+good_place(Restaurant) :-
+	not(limited_seating(Restaurant)).
+	
+?- great_food(X), good_place(X). 	% query 1
+X = eule. 							% as expected
+
+?- good_place(X), great_food(X). 	% query 2
+false. 								% what went wrong?
+
+% Im ersten Beispiel wird X bei great_food für good_place gebunden.
+% Im zweiten Beispiel wird X an good_place ungebunden übergeben.
+\end{lstlisting}
+
+Das Problem liegt bei der Quantifikation von Variablen. Prolog ändert die Quantifikation von existentiell zu universell. Sind die Variablen nicht gebunden (dürfen nicht mehr variabel sein) wird diese Umwandlung gemacht.
 
 \section{Constraint Logik Programmierung}
 
@@ -703,7 +722,7 @@ Bei CLP-FD können die Domänen (Wertebereiche) programmatisch definiert werden.
 	\item[all\_distinct/1:] stellt sicher, dass Variablen in einer Liste paarweise unterschiedliche Werte haben
 	\item[label/1:] Weist allen Variablen einer Liste Werte zu (dadurch werden systematisch Lösungen für das gegebene Problem gesucht)
 \end{description}
-Zudem haben alle Vergleichsoperatoren den Präfix \verb|#| (z.B. \verb|#>|). Listing \ref{lst:clp-fd} zeigt einige Beispiele zu den oben genannten Prädikaten.
+Zudem haben alle Vergleichsoperatoren den Präfix \verb|#| (z.B. \verb|#>|, \verb|#=|). Listing \ref{lst:clp-fd} zeigt einige Beispiele zu den oben genannten Prädikaten.
 \begin{lstlisting}[caption=CLP-FD, label=lst:clp-fd]
 ?- use_module(library(clpfd)).
 % ... (output omitted here)
@@ -728,9 +747,61 @@ X = 2,
 Y = 1.
 \end{lstlisting}
 
+\begin{lstlisting}[caption=Beispiel ohne CLP]
+convert(Celsius, Fahrenheit) :-
+	Celsius is (Fahrenheit - 32)*5/9.
+
+?- convert(C, 95).
+C = 35.
+
+?- convert(35, F).
+ERROR: is/2: Arguments are not sufficiently instantiated
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Beispiel mit CLP]
+:- use_module(library(clpr)).
+convert_clp(Celsius, Fahrenheit) :-
+	{ Celsius = (Fahrenheit - 32)*5/9 }.
+
+?- convert_clp(35, F).
+F = 95.0 .
+
+?- convert_clp(C, F).
+{F=32.0+1.7999999999999998*C}.
+
+; Auch Fibonacci in beide Richtungen wird durch CLP möglich.
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Typische CLP Aufgabe]
+% Theo ist 13 Jahre alt. In 3 Jahren ist der Grossvater doppelt so alt wie Theo's Vater und in 7 Jahren ist der Grossvater viermal so alt wie Theo. Wie
+alt ist der Vater von Theo?
+
+?- { T = 13, G+3 = 2*(V+3), G+7 = 4*(T+7) }.
+T = 13.0, 	% current age of Theo
+G = 73.0, 	% current age of Theos grandfather
+V = 35.0 . 	% current age of Theos father
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Zahlenrätsel]
+send_more_money([S,E,N,D] + [M,O,R,E] = [M,O,N,E,Y]) :-
+	Vars = [S,E,N,D,M,O,R,Y], % define the variables
+	Vars ins 0..9, % define the domain for the vars
+	all_distinct(Vars), % all variables must be different
+	S*1000 + E*100 + N*10 + D +
+	M*1000 + O*100 + R*10 + E #= % attention: use #=/2
+	M*10000 + O*1000 + N*100 + E*10 + Y, % addition must be ok
+	M #\= 0, S #\= 0, % numbers cannot start with zero
+	label(Vars). % assign values to the variable
+
+?- send_more_money(As + Bs = Cs).
+As = [9, 5, 6, 7],
+Bs = [1, 0, 8, 5],
+Cs = [1, 0, 6, 5, 2] .
+\end{lstlisting}
+
 \section{Sudoku}
 
-In Prolog kann mittels CLP relativ einfach beliebige Sudokus gelöst werden. Listing \ref{lst:sudoku} zeigt das gesamte Programm.
+In Prolog kann mittels CLP relativ einfach beliebige Sudokus gelöst werden. Listing \ref{lst:sudoku} zeigt das gesamte Programm. Wenn in jedem Feld eine anonyme Variable übergeben wird, dann returniert Prolog jedes mögliche Sudoku.
 
 \begin{lstlisting}[language=Prolog, caption=Sudoku, label=lst:sudoku]
 :- use_module(library(clpfd)).
