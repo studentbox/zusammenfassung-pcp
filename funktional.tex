@@ -486,7 +486,7 @@ In der funktionalen Programmierung werden grundsätzlich zwei Arten von Funktion
 	\item[Funktionen erster Ordnung:] Die Berechnungsmethodik ist fest vorgegeben, nur die Werte der Variablen können unterschiedlich sein.
 	\item[Funktionen höherer Ordnung:] Die Berechnungsmethodik sowie die Werte der Variablen können von aussen übergeben werden.
 \end{description}
-Funktionen sind in Scheme \textit{Werte erster Klasse}, den sie können als Parameter oder Rückgabewert dienen, an Namen gebunden werden und in Listen aufgenommen werden. Funktionen, die andere Funktionen als Parameter und/oder Resultat haben, heissen \textit{Funktionen höherer Ordnung}, bzw. \textit{Higher-Order Functions}. Durch \textit{Funktionen höherer Ordnung} lassen sich komplexe Sachverhalte einfach und kompakt darstellen. In Prolog kann nur \verb|not| als Funktion der booleschen Operatoren übergeben werden. \verb|and| und \verb|or| können nicht als Parameter übergeben werden. Scheme bietet zahlreiche Funktionen (\verb|filter|, \verb|map|, \verb|apply|) an, um effizient mit Listen zu arbeiten.
+Funktionen sind in Scheme \textit{Werte erster Klasse (first class citizen)}, den sie können als Parameter oder Rückgabewert dienen, an Namen gebunden werden und in Listen aufgenommen werden. Sie bilden einen eigenständigen Datentyp. Funktionen, die andere Funktionen als Parameter und/oder Resultat haben, heissen \textit{Funktionen höherer Ordnung}, bzw. \textit{Higher-Order Functions}. Durch \textit{Funktionen höherer Ordnung} lassen sich komplexe Sachverhalte einfach und kompakt darstellen. In Prolog kann nur \verb|not| als Funktion der booleschen Operatoren übergeben werden. \verb|and| und \verb|or| können nicht als Parameter übergeben werden. Scheme bietet zahlreiche Funktionen (\verb|filter|, \verb|map|, \verb|apply|) an, um effizient mit Listen zu arbeiten. Nebst Funktionen können in Scheme auch die eingebauten Operatoren, wie beispielsweise die Vergleichsoperatoren >, < und = als Paramter in einer Variablen übergeben werden.
 
 \subsection{Funktion \texttt{filter}}
 
@@ -530,7 +530,7 @@ Wenn du meinst \verb|map| und \verb|apply| machen eigentlich das selbe, schau ma
 
 \section{Anonyme Funktionen}
 
-In Scheme liefert die Auswertung eines Lambda-Ausdrucks eine anonyme Funktion zurück. Ein Lambda-Ausdruck hat folgende Syntax \verb|((lambda (<formal parameters>) <expression>) <argument-list>)|. Die Parameter der Funktion werden beim Ausdruck \verb|<formal parameters>| übergeben. Der Rumpf der Funktion ist der \verb|<expression>|-Teil. Zudem kann eine Liste von Argumenten definiert werden, welche den Parametern zugewiesen werden. Listing \ref{lst:lambda-scope} zeigt, dass ein Parameter welcher in der Lambda-Funktion definiert wurde, nicht von aussen beeinflusst werden kann.
+In Scheme liefert die Auswertung eines Lambda-Ausdrucks eine anonyme Funktion zurück, welches einen Wert repräsentiert, weil Funktionen Werte sind. Ein Lambda-Ausdruck hat folgende Syntax \verb|((lambda (<formal parameters>) <expression>) <argument-list>)|. Die Parameter der Funktion werden beim Ausdruck \verb|<formal parameters>| übergeben. Der Rumpf der Funktion ist der \verb|<expression>|-Teil. Zudem kann eine Liste von Argumenten definiert werden, welche den Parametern zugewiesen werden. Listing \ref{lst:lambda-scope} zeigt, dass ein Parameter welcher in der Lambda-Funktion definiert wurde, nicht von aussen beeinflusst werden kann.
 
 \begin{lstlisting}[language=Lisp, caption=Scope eines Lambda-Ausdrucks, label=lst:lambda-scope]
 > (define x 100)
@@ -549,7 +549,7 @@ Zudem gibt es im Lambda-Kalkül nur Funktionsabstraktionen und Funktionsapplikat
 
 \section{Funktionen mit Gedächtnis}
 
-In der rein funktionalen Programmierung bekommt man für die gleiche Eingabe immer die gleiche Ausgabe einer Funktion. Man kann also den Funktionsaufruf durch seinen Wert ersetzen, ohne den Sinn des Programms zu verändern (z.B. \verb|(+ 3 5)| durch \verb|8| ersetzen). Diese Eigenschaft wird referentielle Transparenz genannt. Funktionen mit Gedächtnis sind nicht mehr rein funktional, weil durch den Zustand Nebeneffekte entstehen können. 
+In der rein funktionalen Programmierung bekommt man für die gleiche Eingabe immer die gleiche Ausgabe einer Funktion. Man kann also den Funktionsaufruf durch seinen Wert ersetzen, ohne den Sinn des Programms zu verändern (z.B. \verb|(+ 3 5)| durch \verb|8| ersetzen). Diese Eigenschaft wird \textit{referentielle Transparenz} genannt. Funktionen mit Gedächtnis sind nicht mehr rein funktional, weil durch den Zustand Nebeneffekte entstehen können, welche eine mathematische formale Beweisführung verunmöglicht.
 
 Mit dem Ausdruck \verb|(set! <variable> <expression>)| kann einer Variable ein Wert zugewiesen werden. Dabei muss der Name der \verb|<variable>| definiert sein. Es wird der Ausdruck \verb|<expression>| ausgewertet und der resultierende Wert an den Namen der \verb|<variable>| gebunden. Listing \ref{lst:counter} zeigt einen einfachen Zähler mit Gedächtnis.
 
@@ -566,11 +566,11 @@ Mit dem Ausdruck \verb|(set! <variable> <expression>)| kann einer Variable ein W
 1
 \end{lstlisting}
 
-Ein weiteres Element der imperativen Programmierung in Scheme ist die Sequenz. Eine Sequenz hat die Form \verb|(begin <expression-1>...<expression-N> <expression>)| und wertet alle \verb|expressions| in der gegebenen Reihenfolge aus. Die Sequenz liefert dann den Wert von \verb|expression| zurück.
+Ein weiteres Element der imperativen Programmierung in Scheme ist die Sequenz. Eine Sequenz hat die Form \verb|(begin <expression-1>...<expression-N> <expression>)| und wertet alle \verb|expressions| in der gegebenen Reihenfolge aus. Die Sequenz liefert dann den Wert von \verb|expression| zurück. Bisher haben wir Sequenzen mit dem \verb|AND|-Operator implementiert. Jedoch müssen alle Aufrufe immer \verb|true| zurückliefern, damit die gesamte Sequenz ausgeführt wird.
 
 \section{Ein- und Ausgabe}
 
-Scheme benutzt Ports für die Ein- und Ausgabe. Ports bedienen Datenquellen oder -senken, z.B. File, Terminal oder TCP Verbindung. Ein Port muss offen sein, bevor man ihn zum Lesen oder Schreiben benutzen kann. Der Standard I/O Port, d.h. der Konsolen I/O-Port, ist beim Start von Scheme automatisch offen. Listing \ref{lst:read-file} zeigt wie man in Scheme eine Datei einliest. 
+Scheme benutzt Ports für die Ein- und Ausgabe. Ports bedienen Datenquellen oder -senken, z.B. File, Terminal oder TCP Verbindung. Diese sind wie Scheme-Objekte und handeln den ganzen In- und Output. Ein Port muss offen sein, bevor man ihn zum Lesen oder Schreiben benutzen kann. Der Standard I/O Port, d.h. der Konsolen I/O-Port, ist beim Start von Scheme automatisch offen. Listing \ref{lst:read-file} zeigt wie man in Scheme eine Datei einliest. Bei \verb|open-input-file| wird der Prot zurückgegeben und der Zeiger wird auf den Beginn der Datei gesetzt (auf das erste Symbol). Es ist immer darauf zu achten, dass bei Output-Streams schlussendlich geflusht und geschlossen wird.
 
 \begin{lstlisting}[language=Lisp, caption=Datei lesen, label=lst:read-file]
 ; Port öffnen, um aus der Datei zu lesen
