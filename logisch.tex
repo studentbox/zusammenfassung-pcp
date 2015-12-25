@@ -344,9 +344,9 @@ fib(N, F) :-
 
 \section{Optimierungen}
 
-Backtracking ist grundsätzlich nicht sehr effizient. Wir können. Um dies zu entschärfen gibt es zwei bekannte Methoden: Endrekursion und Assertions.
+Backtracking ist grundsätzlich nicht sehr effizient. Um dies zu entschärfen gibt es zwei bekannte Methoden: Endrekursion und Memoization.
 
-\subsection{Optimierung durch Endrekursion}
+\subsection{Endrekursion}
 Die Endrekursion ist auch bekannt als \emph{tail recursion}. Der Vorteil ist, dass kein Backtracking benötigt wird. Eine Endrekursion kann als Iteration ohne zusätzlichen Speicherplatz ausgeführt werden. Eine Prozedur ist endrekursiv, wenn:
 
 \begin{itemize}
@@ -366,7 +366,7 @@ p(...) :- ..., 	% all deterministic and
 	p(...). 	% tail-recursive call
 \end{lstlisting}
 
-Im Listing \ref{lst:naiv-fib} ist die rekursive Berechnung alles andere als effizient. Möchte man die Fibonacci Zahl für 30 berechnen, führt dies auf herkömmlichen Rechnern zu einem \emph{ERROR: Out of local stack}. Das Problem ist, dass viele Zwischenresultate mehrmals berechnet werden müssen. Für \emph{f(6)} muss 5x \emph{f(2)} ausgewertet werden. Die Umwandlung von einem naivem Prolog-Programm in ein endrekursives ist nicht trivial! Typischerweise werden zusätzlich neue Argumente verwendet: Akkumulatoren. Diese werden verwendet um Zwischenresultate zu speichern.
+Im Listing \ref{lst:naiv-fib} ist die rekursive Berechnung alles andere als effizient. Möchte man die Fibonacci Zahl für 30 berechnen, führt dies auf herkömmlichen Rechnern zu einem \verb|ERROR: Out of local stack|. Das Problem ist, dass viele Zwischenresultate mehrmals berechnet werden müssen. Für \verb|f(6)| muss 5x \verb|f(2)| ausgewertet werden. Die Umwandlung von einem naivem Prolog-Programm in ein endrekursives ist nicht trivial! Typischerweise werden zusätzlich neue Argumente verwendet: Akkumulatoren. Diese werden verwendet um Zwischenresultate zu speichern.
 
 \begin{lstlisting}[caption=Endrekursive Fibonnaci-Berechnung]
 fib_tr(N, F) :- fib_tr(N, 0, 1, F). % call accumulator
@@ -381,7 +381,8 @@ fib_tr(N, A, B, F) :- 				% general case
 Fazit: Falls der Speicherplatz bei einer rekursiven Prozedur kritisch wird, hilft die Umwandlung in ein endrekursive Prozedur. Diese kann als Iteration ausgeführt werden, benötigt oft weitere Argumente: Akkumulatoren.
 
 \newpage
-\subsection{Optimierung durch Assertions (Memoization)}
+
+\subsection{Memoization}
 Die Wissensdatenbank kann nicht nur statisch sondern auch dynamisch zur Laufzeit manipuliert werden. Dies kann für Memoization (auch Caching) genutzt werden.
 
 \begin{lstlisting}[caption=dynamic/1]
@@ -437,8 +438,11 @@ bigger(elephant, me).
 \end{lstlisting}
 
 \newpage
+
 \begin{lstlisting}[caption=Naive Fibonnaci optimiert mit Assertions]
-% Nach jeder Berechnung einer Fibonacci Zahl wird diese in die Wissensdatenbank an den Anfang (wichtig) gespeichert. Diese müssen nun nicht mehr neu berechnet werden.
+% Nach jeder Berechnung einer Fibonacci Zahl wird diese in die Wissensdatenbank an 
+% den Anfang (wichtig) gespeichert. Diese müssen nun nicht mehr neu berechnet 
+% werden.
 :- dynamic fib_as/2.
 fib_as(0, 0). 				% base case 1
 fib_as(1, 1). 				% base case 2
@@ -453,7 +457,7 @@ fib_as(N, F) :- 			% general rule
 \end{lstlisting}
 
 \section{Listen}
-In Prolog gibt es Listen als Datenstrukturen. Eine Liste ist eine endliche Sequenz von Elementen. Listen werden mit eckigen Klammern dargestellt. Die Länger einer Liste ist die Anzahl darin enthaltenen Elemente. Listen-Elemente sind beliebige Terme. Die leere Liste [] ist eine spezielle Liste.
+In Prolog gibt es Listen als Datenstrukturen. Eine Liste ist eine endliche Sequenz von Elementen. Listen werden mit eckigen Klammern dargestellt. Die Länger einer Liste ist die Anzahl darin enthaltenen Elemente. Listen-Elemente sind beliebige Terme. Die leere Liste \verb|[]| ist eine spezielle Liste.
 
 \begin{lstlisting}[caption=Listen in Prolog]
 ?- X = [a, b, c].
@@ -489,7 +493,9 @@ Ist X ein Element der Liste L? X kommt in der Liste vor, wenn X gleich Kopf der 
 mem(X, [X | _]). 					% tail doesnt matter
 mem(X, [_| Tail]) :- mem(X, Tail). 	% head doesnt matter
 
-% Anmerkung: Wenn auf der linken Seite Variabeln definiert werden, welche auf der rechten Seite nicht verwendet werden, dann kommt es zur Warnung: Singleton Variables.
+% Anmerkung: Wenn auf der linken Seite Variabeln definiert werden, welche auf der
+% rechten Seite nicht verwendet werden, dann kommt es zur Warnung: 
+% Singleton Variables.
 
 ?- mem(b, [a, b, c]).
 true.
@@ -556,6 +562,7 @@ false.
 \end{lstlisting}
 
 \newpage
+
 \section{Reihenfolge von Regeln und Zielen}
 Die Reihenfolgen der Fakten und Regeln in der Wissensdatenbank spielt ein Rolle. Auch die Reihenfolge der Ziele von Regeln.
 
@@ -577,7 +584,9 @@ ib_1(X, Y) :- 				% rule 1
 	bigger(X, Z), 			% rule 1, goal 1
 	ib_1(Z, Y). 			% rule 1, goal 2
 ib_1(X, Y) :- bigger(X, Y). % rule 2
-% Die Lösung funktioniert, jedoch verwendet der resultierende Suchbaum viel mehr Backtracking - ineffizienter. Dies kann also die Effizienz von Prozeduren verschlechtern.
+% Die Lösung funktioniert, jedoch verwendet der resultierende Suchbaum viel mehr
+% Backtracking - ineffizienter. Dies kann also die Effizienz von Prozeduren
+% verschlechtern.
 
 % Rule 1 und Rule 2 vertauscht (Reihenfolge von Regeln und Zielen vertauscht):
 bigger(elephant, horse). 	% fact 1
@@ -587,14 +596,17 @@ ib_2(X, Y) :- 				% rule 1
 	ib_2(Z, Y), 			% rule 1, goal 1
 	bigger(X, Z). 			% rule 1, goal 2
 ib_2(X, Y) :- bigger(X, Y). % rule 2
-% Kann die Anfragen nicht mehr beantworten: ERROR Out of local stack. Es wird endlos ib_2(_X, dog) aufgerufen bei der Anfrage von ib_2(elephant, dog). Änderung der Reihenfolge von Regeln und Zielen kann zu unbrauchbaren Programmen führen.
+% Kann die Anfragen nicht mehr beantworten: ERROR Out of local stack. Es wird endlos
+% ib_2(_X, dog) aufgerufen bei der Anfrage von ib_2(elephant, dog). Änderung der
+% Reihenfolge von Regeln und Zielen kann zu unbrauchbaren Programmen führen.
 \end{lstlisting}
 
 Es sollten zuerst immer die einfachen Dinge probiert werden. Typischerweise zuerst die Rekursionsbasis (einfacher Fall) und dann erst den allgemeinen Fall. 
 
 \newpage
+
 \section{Konjunktion und Diskonjunktion}
-Beim definieren von Regeln wird nach :- die Ziele definiert. Einzelne Ziele werden dabei durch Komma getrennt, welches eine AND-Verknüpfung also einer Konjunktion entsprechen. Die Regel wird mit dem Punkt-Operator abgeschlossen. Auch Anfragen können verUNDet werden. Disjunktion (ODER) können mit Semikolon realisiert werden. Konjunktion und Disjunktion sind handelsübliche Prädikate. 
+Beim definieren von Regeln wird nach \verb|:-| die Ziele definiert. Einzelne Ziele werden dabei durch Komma getrennt, welches eine AND-Verknüpfung also einer Konjunktion entsprechen. Die Regel wird mit dem Punkt-Operator abgeschlossen. Auch Anfragen können verUNDet werden. Disjunktion (ODER) können mit Semikolon realisiert werden. Konjunktion und Disjunktion sind handelsübliche Prädikate. 
 
 \begin{lstlisting}[caption=Disjunktion]
 rich(tom). 			% fact 1
@@ -612,21 +624,27 @@ true.
 X = a 				% pressing ;
 X = b.
 
-% Best Practices: Wir verwenden keine Disjunktion. Denn diese sind immer equivalent zu zwei Regeln mit den beiden Operanden der Disjunktion. Programme sind so einfacher zu verstehen.
+% Best Practices: Wir verwenden keine Disjunktion. Denn diese sind immer equivalent 
+% zu zwei Regeln mit den beiden Operanden der Disjunktion. Programme sind so 
+% einfacher zu verstehen.
 interesting1(X) :- rich(X); nice(X). 	% disjunction
 interesting2(X) :- rich(X). 			% rule 1
 interesting2(X) :- nice(X). 			% rule 2
 \end{lstlisting}
 
 \newpage
+
 \section{CUT-Operator}
+
 Das Backtracking ist für Prolog charakteristisch. Dies kann aber oft zu Ineffizienzen führen. Prolog verschwendet Zeit und Speicher für Dinge die nirgends hinführen. Manchmal wäre etwas Kontrolle wünschenswert, dabei geht aber die vollständige deklarative Bedeutung verloren.
 
-Mittels dem CUT-Operator \emph{!/0} kann Einfluss aufs Backtracking genommen werden. Dieser nimmt kein Argument, ist immer erfüllt und bindet die bisherige Wahl innerhalb der aktuellen Klausel.
+Mittels dem CUT-Operator \verb|!/0| kann Einfluss aufs Backtracking genommen werden. Dieser nimmt kein Argument, ist immer erfüllt und bindet die bisherige Wahl innerhalb der aktuellen Klausel.
 
 \begin{lstlisting}[caption=Beispiel CUT-Operator]
-% Wenn in folgender Regel der CUT erreicht wird. Bindet uns das zur linken Seite, nämlich zur spezifischen Klausel p und zu der Wahl b. Es bindet uns jedoch nicht zur rechten Seite - im Beispiel zur Wahl c.
-p(X):- b(X), !, c(X).
+% Wenn in folgender Regel der CUT erreicht wird. Bindet uns das zur linken Seite, 
+% nämlich zur spezifischen Klausel p und zu der Wahl b. Es bindet uns jedoch nicht 
+% zur rechten Seite - im Beispiel zur Wahl c.
+p(X) :- b(X), !, c(X).
 \end{lstlisting}
 
 \begin{figure}[h!]
@@ -637,7 +655,6 @@ p(X):- b(X), !, c(X).
 \end{figure}
 
 Wenn CUTS implementiert werden, wird zwischen RED-CUT und GREEN-CUT unterschieden. GREEN-CUTS verändern die deklarative Bedeutung von Programmen nicht. Damit können Programme optimiert werden. RED-CUTS verändern nicht nur die prozedurale Bedeutung sondern auch die deklarative. RED-CUTS mit Sorgfalt verwenden, diese können nämlichen zu subtilen Programmierfehlern führen und können schwer zu verstehen sein.
-
 
 \section{Negation von Prädikaten}
 
