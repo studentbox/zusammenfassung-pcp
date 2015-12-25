@@ -29,7 +29,7 @@ public class InterfaceDemo implements DemoInterface, OtherInterface {
 
 \section{Lambda-Ausdrücke}
 
-Mit Java 8 wurden neu Lambdas (oder nach Java-Slang: Closure) eingeführt. Listing \ref{lst:lambda-ausdruecke} zeigt die Syntax. \textit{Lambdas sind: anonyme Methoden (ad-hoc Implementationen), code as data - first class citizen (Funktioanlität als Parameter/Rückgabewert) und überlegen gegnüber (anonymen) inneren Klassen.}
+Mit Java 8 wurden neu Lambdas (oder nach Java-Slang: Closure) eingeführt. Listing \ref{lst:lambda-ausdruecke} zeigt die Syntax. \textit{Lambdas sind: anonyme Methoden (ad-hoc Implementationen), code as data - first class citizen (Funktioanlität als Parameter/Rückgabewert) und überlegen gegnüber (anonymen) inneren Klassen. Man drückt sich als Entwickler wie folgt aus um eine Lambda zu definieren: Ich bilde int x und int y auf einen String ab.}
 
 \begin{lstlisting}[language=Java, caption=Lambda-Ausdrücke, label=lst:lambda-ausdruecke]
 (int x, int y) -> { return x+y; }
@@ -134,7 +134,112 @@ Es lassen sich auch unendliche Streams (z.B. mit \verb|DoubleStream.generate(Mat
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.4\linewidth]{fig/java-stream-executions}
+\includegraphics[width=0.6\linewidth]{fig/java-stream-executions}
 \caption{Ausführungsreihenfolge in Streams}
 \label{fig:java-stream-executions}
 \end{figure}
+
+\newpage
+\section{Optional<T>}
+Wer kennt sie nicht, die wohl teuerste Exception in der Geschichte der Informatik. Man nennt sie \emph{Null Pointer Exception} unter Experten auch als \emph{NPE} bekannt. Diese Fehler sind immer zu vermeiden, wenn korrekt mit \verb|null| umgegangen wird. Leider hat Java das nicht mit der Sprache selbst gelöst, wie beispielsweise Swift. Erst in Java 8 gibt es nun ein Konstrukt in Form einer generischen Klasse namens \verb|Optional|. Auch \verb|reduce| gibt ein \verb|Optional| zurück.
+
+\begin{lstlisting}[language=Java, caption=Optional]
+String[] namesArray = {"Joe", "Tara", "Sue", "Tim" };
+List<String> names = Arrays.asList(namesArray);
+Optional<String> o = names.stream()
+	.filter(s -> s.startsWith("T"))
+	.map(s -> s.toUpperCase())
+	.reduce((s, t) -> s + " " + t);
+	
+if (o.isPresent()) {
+	System.out.println(o.get());
+}
+System.out.println(o.orElse("alternative string"));
+\end{lstlisting}
+
+\section{String}
+Java bietet nun diverse Methoden an um einfacher mit Strings umzugehen.
+
+\begin{lstlisting}[language=Java, caption=String]
+// Strings zusammenfügen
+String.join(" ", "The", "quick", "red", "fox"); // Erstes Argument ist delimiter
+
+// Auch über Iterables möglich
+String[] namesArr = { "Joe", "sara", "Sue", "Tim" };
+List<String> nameList = Arrays.asList(namesArr);
+String.join("-", nameList);
+
+// Oder über den StringJoiner
+StringJoiner sj = new StringJoiner(":", "[", "]");
+sj.add("George").add("Sally").add("Fred");
+String desiredString = sj.toString();
+\end{lstlisting}
+
+\section{Comparator}
+Auch das API für Vergleiche wurde etwas aufgepeppt und bietet nun diverse Operationen an, welche zuvor mühsam von Hand implementiert werden mussten. Konkret wurde das Interface \verb|java.util.Comparator| erweitert:
+
+\begin{description}
+	\item[static naturalOrder()] Liefert einen natürlich ordnenden Comparator. Natürliche Ordnung basiert auf der natürlichen Wertigkeit. Zahlen definieren direkt ihre Wertigkeit und bei Strings werden diese lexogeographisch verglichen.
+	\item[default reversed()] Liefert einen umgekehrt ordnenden Comparator.
+	\item[default thenComparing(...)] Verbindet zwei Comparators.
+	\item[static nullsFirst(...) bzw. static nullsLast()] Stellt sicher, dass durch einem gegeben Comparator null-Werte vor bzw. nach andern Werten geordnet werden.
+\end{description}
+
+\section{Nebenläufigkeit mit Completable Futures}
+\begin{description}
+	\item[java.util.concurrent.Future<V>] Seit Java 5. \emph{A Future represents the result of an	asynchronous computation. Methods are provided to	check if the computation is complete, to wait for its completion, and to retrieve the result of the computation. The result can only be retrieved using method get when the computation has completed, blocking if necessary until it is ready}. Future-Instanzen werden oft mit Executoren in Verbindung gebracht.
+	\item[java.util.concurrent.CompletableFuture<T>] Seit Java 8. \emph{A Future that may be explicitly completed (setting its value and status), and may be used as a 	CompletionStage, supporting dependent functions and actions that trigger upon its completion}. Diese erlauben kompakten Syntax für asynchrone funktionale Programmierung.
+\end{description}
+
+\begin{lstlisting}[language=Java, caption=CompletableFuture]
+private static final int THREE_SECONDS = 3000;
+private static final int HALF_SECOND = 500;
+
+public static void doBlockingWait(long waitingTimeMillis) {
+	try {
+		Thread.sleep(waitingTimeMillis);
+	} catch (InterruptedException ie) {
+	// nop.
+	}
+}
+
+private static void doCompletableFutureDemo() {
+	// supplyAsync nimmt ein Supplier entgegen
+	// Supplier = Kein Argument, beliebiger Rückgabewert
+	final CompletableFuture<String> longLastingTaskFuture
+		= CompletableFuture.supplyAsync(() -> {
+			doBlockingWait(THREE_SECONDS);
+			System.out.print("1");
+			return "42";
+		});
+		
+	// thenApplyAsync nimmt eine Function entgegen
+	// Function = Beliebiges Argument, beliebiger Rückgabewert
+	final CompletableFuture<String> evenLongerLastingTaskFuture
+		= longLastingTaskFuture.thenApplyAsync((String s) -> {
+			doBlockingWait(THREE_SECONDS);
+			System.out.print("2");
+			return "The answer is " + s;
+		});
+	
+	// thenAcceptAsync nimmt einen Consumer entgegen
+	// Consumer = Beliebiges Argument, kein Rückgabewert
+	evenLongerLastingTaskFuture.thenAcceptAsync((String s) -> {
+		doBlockingWait(THREE_SECONDS);
+		System.out.print(s);
+	});
+	
+	System.out.println("-> Now waiting for things to happen!");
+	for (int i = 0; i < 20; i++) {
+		System.out.print(".");
+		doBlockingWait(HALF_SECOND);
+	}
+	System.out.println();
+	System.out.println("-> Done.");
+}
+
+Produzierte Konsolenausgabe:
+-> Now waiting for things to happen!
+......1......2......The answer is 42..
+-> Done
+\end{lstlisting}
