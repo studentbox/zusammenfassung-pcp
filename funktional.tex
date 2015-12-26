@@ -1,7 +1,7 @@
 \chapter{Funktionale Programmierung (Scheme)}
 Scheme folgt dem deklarativ-funktionalem Programmierparadigma. Nachfolgend einige Beispiele von funktionale Programmiersprachen: LISP (Common Lisp, Scheme, Clojure), MetaLanguage (ML) Familie (SML, OCaml, F\#) und Haskell.
 
-LISP (LISt Processing) ist durch das Lambda Kalkül inspiriert und ist homoikonisch. Homoikonizität bedeutet Selbst-Abbildbarkeit oder Selbst-Repräsentiertbarkeit. Dies ist eine Eigenschaft von Programmiersprachen, dass Programme gleichzeitig Datenstrukturen derselben Sprachen sind. In solchen Sprachen ist es einfach Programme zu schreiben, die Programme schreiben (Turingmaschine). \emph{(In LISP ist jedes Programm eine Liste)}
+LISP (LISt Processing) ist durch das Lambda Kalkül inspiriert und ist homoikonisch. Homoikonizität bedeutet Selbst-Abbildbarkeit oder Selbst-Repräsentiertbarkeit. Dies ist eine Eigenschaft von Programmiersprachen, dass Programme gleichzeitig Datenstrukturen derselben Sprachen sind. In solchen Sprachen ist es einfach Programme zu schreiben, die Programme schreiben (Turingmaschine). In LISP ist z.B. jedes Programm eine Liste.
 
 \section{Prinzipien der funktionalen Programmierung}
 Im Zentrum stehen Funktionen und die Anwendung von Funktionen:
@@ -14,15 +14,12 @@ Im Zentrum stehen Funktionen und die Anwendung von Funktionen:
 \end{itemize}
 Aufgaben werden in kleinere Aufgaben zerlegt (Dekomposition) um diese schlussendlich wieder zusammenzuführen (Komposition).
 
-\section{DrRacket}
-DrRacket ist eine integrierte Entwicklungsumgebung (IDE) für den Scheme-Dialekt Racket. Es können verschiedene, skalierbare Scheme-Dialekte ausgeführt werden. Es hat eine REPL Konsole (Read-Evalute-Print Loop) integriert. Zudem gibt es einen Stepper bei dem der Funktionsaufruf verfolgt werden kann.
-
 \section{Syntax}
 \begin{description}
 	\item[Zahlen] Primitive atomare Ausdrücke. Nebst rationalen Zahlen können auch reelle, irrationale und komplexe Zahlen definiert werden.
 	\item[Bool] Es gibt \verb|true| und \verb|false|. Alternative Darstellungen: \verb|#t|, \verb|#f|, \verb|#true|, \verb|#false|.
 	\item[Operatoren] Scheme hat eingbaute mathematische Operatoren, welche auch als PRIMS-OPS \emph{(primitve operations)} bezeichnet werden. Beispiele: \verb|+, -, *, /, quotient, remainder, expt,| \verb|modulo, abs, max, min, sin, tan, exp ...|
-	\item[Form] Es kann fast alles in folgender Form deklariert werden: \verb|(<operator> <operand1> <operand2> ...)|. Dabei ist die Reihenfolge der Auswertung nicht festgelegt! Wichtig: Diese Notation nennt man \textbf{Form}. Formen werden ausgewertet.
+	\item[Form] Es kann fast alles in folgender Form deklariert werden: \verb|(<operator> <operand1> <operand2> ...)|. Dabei ist die Reihenfolge der Auswertung nicht festgelegt! Formen können auch gschachtelt werden.
 	\item[Klammern] Die Klammern sind Fluch und Segen zugleich. Dadurch können die Operatorenrangfolge jederzeit selbst definiert werden. Jedoch wiegt die hohe Anzahl der Klammern als Laster. Gewisse Scheme-Implementation wie Racket unterstützen auch eckige Klammern. Man erhält etwas mehr Übersicht.
 \end{description}
 
@@ -124,7 +121,7 @@ true
 \end{lstlisting}
 
 \subsection{Prädikatsfunktionen}
-Diese müssen \textbf{immer} einen Wahrheitswert zurück. Der Funktionsname endet mit einem Fragezeichen.
+Prädikatsfunktionen müssen \textbf{immer} einen Wahrheitswert zurückgeben. Der Funktionsname endet mit einem Fragezeichen.
 \begin{description}
 	\item[Test auf Zahlen] \verb|integer? real? rational? complex? odd? even? zero? negative? positive?|
 	\item[Test auf Basistypen] \verb|boolean? number? char? null? string? symbol? procedure?|
@@ -222,8 +219,7 @@ Mittels \verb|if| können Selektionen realisiert werden. Der \verb|else|-Teil is
 ; Der Variable gibt man schlauerweise noch einen Namen
 (define <name> (make-<typename> <value1>...<valueN>))
 
-; Beispiele
-(define-struct member (lastname firstname number))
+; Beispiel
 (define-struct point (x y)) 							; Typ-Definition
 (make-point 7 3) 										; Konstruktor-Aufruf
 (define p1 (make-point 3 4)) 							; Variablen-Definition
@@ -233,7 +229,7 @@ Mittels \verb|if| können Selektionen realisiert werden. Der \verb|else|-Teil is
 > (point-x p1)
 3
 > (point-y p1)
-4 >
+4
 
 ; P.S.: Es können keine Typendefintionen definiert werden. In Scheme kommentiert man die Datentypen in den Strukturen. Scheme hat einen vordefinierte Struktur für den Punkt: posn (x y).
 \end{lstlisting}
