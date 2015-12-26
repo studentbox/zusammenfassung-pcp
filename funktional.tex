@@ -292,38 +292,34 @@ Da Listen \emph{rekursive Datentypen} sind, haben die Funktionen, welche auf Lis
 ; Summieren
 (define (sum a-list)
 	(cond ((empty? a-list) 0)
-	(else
-	(+ (first a-list) (sum (rest a-list))))))
+	(else (+ (first a-list) (sum (rest a-list))))))
 	
 > (sum (list 3 2 1))
 6
 
 ; Elemente verdoppeln
 (define (redouble a-list)
-	(if (empty? a-list)
-		empty
-		(cons
-			(* 2 (first a-list)) (redouble (rest a-list)))
-))
+	(if (empty? a-list) empty
+		(cons (* 2 (first a-list)) (redouble (rest a-list)))
+	)
+)
 
 >(redouble (list 3 2 1))
 (list 6 4 2)
 
 ; Sortieren von Zahlen
 define (insert value a-list)
-	(cond
+	(cond 
 		((empty? a-list) (list value))
 		((<= value (first a-list)) (cons value a-list))
-		(else (cons (first a-list)
-			(insert value (rest a-list))))
-))
-
+		(else (cons (first a-list) (insert value (rest a-list))))
+	)
+)
 
 (define(sort-by-insert num-list)
 	(cond
 		((empty? num-list) empty)
-		(else (insert (first num-list)
-			(sort-by-insert (rest num-list))))
+		(else (insert (first num-list) (sort-by-insert (rest num-list))))
 ))
 
 > (sort-by-insert '(12 54 32 21))
@@ -331,7 +327,7 @@ define (insert value a-list)
 \end{lstlisting}
 
 \section{Typen von Rekursionen}
-Wenn eine Funktion sich selber aufruft, ist sie rekursiv. Diese beinhaltet eine Verzweigung. Ein Zweig terminiert die Rekursion der andere ruft die Funktion selber wieder auf. Bei \textbf{wohldefinierten rekursiven Funktionen} terminiert die Auswertung. Nebst Listen sind auch natürliche Zahlen rekursive Datenstrukturen. Wenn ich bei 100 beginne immer 1 abzuziehen, bin ich irgendwann mal bei 0.
+Wenn eine Funktion sich selber aufruft, ist sie rekursiv. Diese beinhaltet eine Verzweigung. Ein Zweig terminiert die Rekursion, der andere ruft die Funktion selber wieder auf. Bei \textbf{wohldefinierten rekursiven Funktionen} terminiert die Auswertung. Die Funktion \verb|(define (f foo) (f foo))| wäre nicht wohldefiniert, weil sie sich unendlich selbst aufruft. Nebst Listen sind auch natürliche Zahlen rekursive Datenstrukturen. Wenn ich bei 100 beginne immer 1 abzuziehen, bin ich irgendwann mal bei 0.
 
 \subsection{Strukturelle Rekursion}
 In den obigen Beispielen wurden strukturelle Rekursionen verwendet. Die Struktur der Funktion folgt nämlich der Struktur der Daten. Diese sind stets wohldefiniert! Die Eingabedaten wurden in ihre direkten strukturellen Komponenten zerlegt. Die rekursive Funktion wird so oft aufgerufen wie es Elemente in der Liste gibt. Diese folgt dem generellen Funktionsschema für rekursive Datenstrukturen. Jedoch lassen sich nicht alle Probleme damit lösen und ist oft nicht immer die beste Lösung. Beispiel:
@@ -340,11 +336,14 @@ In den obigen Beispielen wurden strukturelle Rekursionen verwendet. Die Struktur
 (define (list-max a-list)
 	(cond
 		[(empty? (rest a-list)) (first a-list)]
-		[else (cond
-		[(> (first a-list) (list-max (rest a-list)))
-			(first a-list)]
-		[else (list-max (rest a-list))])]
-))
+		[else 
+		(cond
+			[(> (first a-list) (list-max (rest a-list))) (first a-list)]
+			[else (list-max (rest a-list))]
+		)
+		]
+	)
+)
 
 > (list-max (list 2 3 6 5 9 1))
 9
@@ -401,6 +400,7 @@ Möchte man die Berechnung des grössten gemeinsamen Teilers (GCD) mittels akkum
 \end{itemize}
 
 \newpage
+
 \section{Namensräume}
 Die mit \verb|define| definierten Namen sind global gültig. Zu jedem Zeitpunkt liegen also eine Menge von Namen mit Bindung für Werte und Funktionen vor. Diese veränderliche Bindungen bilden die \textbf{globale Umgebung}.
 	
@@ -439,10 +439,10 @@ Im Rumpf einer Funktionsdefinition können Hilfsvariablen definiert werden. Dies
 \begin{lstlisting}[language=Lisp, caption=Lokale Variablen mit local]
 (define (f x y z)
 	(local
-	([define p (+ x y)]
-	[define q (+ z y)])
-	(+ (sqr p) (sqr q))
-))
+		([define p (+ x y)] [define q (+ z y)])
+		(+ (sqr p) (sqr q))
+	)
+)
 \end{lstlisting}
 
 Mit der speziellen Form \verb|let| können lokale Variablen definiert werden. \verb|let| darf im Gegensatz zu \verb|local| nur für Variablendefinitionen verwendet werden und nicht für Funktionsdefinitionen. Es gibt noch die spezielle Form \verb|let*|, welche den gleichen Syntax wie \verb|let| hat. Sie unterscheiden sich in der Auswertung. Wobei \verb|let*| von links nach rechts auswertet und \verb|let| zuerst alle Expressions auswertet und diese erst dann den Variablen Namen zuordnet.
@@ -450,10 +450,10 @@ Mit der speziellen Form \verb|let| können lokale Variablen definiert werden. \v
 \begin{lstlisting}[language=Lisp, caption=Lokale Variablen mit let]
 (define (f x y z)
 	(let
-	([p (+ x y)]
-	[q (+ z y)])
-	(+ (sqr p) (sqr q))
-))
+		([p (+ x y)] [q (+ z y)])
+		(+ (sqr p) (sqr q))
+	)
+)
 
 ; Funktioniert nicht, da let zuerst die Expressions auswertet und dann erst die Zuweisung macht. Die Variable a muss vorgängig definiert werden.
 > (let ((a 10) (b (* 2 a))) (+ a b))
