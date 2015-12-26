@@ -47,13 +47,11 @@ struct point {
 };
 
 // Anwendung
-struct point p;
-p.x = 100;
-p.y = 200;
+struct point p; p.x = 100; p.y = 200;
 printf(" p = (%i, %i)", p.x, p.y);
 \end{lstlisting}
 
-Mit dem Schlüsselwort \verb|typedef| lassen sich eigene Datentypen definieren. Listing \ref{lst:typedef} zeigt ein Beispiel für eigene Datentypen.
+Mit dem Schlüsselwort \verb|typedef| lassen sich eigene Datentypen definieren. Diese werden oft verwendet, da jedes System die Datentypen auf seine Art und Weise interpretieren kann. Auf gewissen Systemen ist ein \verb|int| 64Bit und auf anderen nur 32Bit. Mit eigenen Datentypen lässt sich die Länge fix definieren. Listing \ref{lst:typedef} zeigt ein Beispiel für eigene Datentypen.
 
 \begin{lstlisting}[language=C, caption=Eigene Typen, label=lst:typedef]
 typedef int people_count; // create own data type
@@ -68,8 +66,7 @@ typedef struct {
 	int y;
 } point_type;
 point_type pt; // Hier kommt kein struct mehr
-pt.x = 100;
-pt.y = 200;
+pt.x = 100; pt.y = 200;
 \end{lstlisting}
 
 In C werden abstrakte Datentypen (ADT) verwendet, um Daten und Operationen miteinander zu verwenden. Ein ADT beschreibt, was die Operationen tun (Semantik), aber noch nicht, wie sie es tun sollen (Implementierung). Ein typisches Beispiel für ein ADT ist ein Stack. Listing \ref{lst:stack} zeigt den ADT eines Stacks, welcher die Funktionssignatur und die Semantik definiert.
