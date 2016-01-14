@@ -21,7 +21,9 @@ public interface OtherInterface {
 public class InterfaceDemo implements DemoInterface, OtherInterface {
 	@Override
 	public int getLuckyNumber() {
-		// Neuer super syntax. Der Aufruf einer Interface-Default-Methode von einer implementierende Klasse aus, muss so erfolgen. Der folgende Aufruf, ausserhalb einer implementieren Klasse, funktioniert nicht.
+		// Neuer super syntax. Der Aufruf einer Interface-Default-Methode von einer 
+		// implementierende Klasse aus, muss so erfolgen. Der folgende Aufruf, 
+		// ausserhalb einer implementieren Klasse, funktioniert nicht.
 		return DemoInterface.super.getLuckyNumber();
 	} 
 }
@@ -29,16 +31,16 @@ public class InterfaceDemo implements DemoInterface, OtherInterface {
 
 \section{Lambda-Ausdrücke}
 
-Mit Java 8 wurden neu Lambdas (oder nach Java-Slang: Closure) eingeführt. Listing \ref{lst:lambda-ausdruecke} zeigt die Syntax. \textit{Lambdas sind: anonyme Methoden (ad-hoc Implementationen), code as data - first class citizen (Funktioanlität als Parameter/Rückgabewert) und überlegen gegnüber (anonymen) inneren Klassen. Man drückt sich als Entwickler wie folgt aus um eine Lambda zu definieren: Ich bilde int x und int y auf einen String ab.}
+Mit Java 8 wurden neu Lambdas (oder nicht Java-Slang: \textit{Closure}) eingeführt. Listing \ref{lst:lambda-ausdruecke} zeigt die Syntax. Lambdas sind: anonyme Methoden (ad-hoc Implementationen), code as data - first class citizen (Funktioanlität als Parameter/Rückgabewert) und überlegen gegenüber (anonymen) inneren Klassen. Man drückt sich als Entwickler wie folgt aus um eine Lambda zu definieren: Ich bilde int x und int y auf einen String ab.
 
 \begin{lstlisting}[language=Java, caption=Lambda-Ausdrücke, label=lst:lambda-ausdruecke]
-(int x, int y) -> { return x+y; }
+(int x, int y) -> { return x + y; }
 
 // Argument type is inferred:
-(x, y) -> { return x+y; }
+(x, y) -> { return x + y; }
 
 // No brackets needed if only one argument
-x -> { return x+1; }
+x -> { return x + 1; }
 
 // No arguments needed
 () -> { System.out.println("I am a Runnable"); }
@@ -90,7 +92,7 @@ Generics definieren je nachdem Argument-Typen und/oder Rückgabe-Typ. Lambdas f�
 Mittels Methoden-Referenzen (z.B. \verb|String::length|) können existierende Methoden einer Klasse als Lambda-Ausdrücke verwendet werden. Dadurch kann im Gegensatz zu Lambdas weniger Code geschrieben werden und dieser auch wiederverwendet werden. Es gibt die folgenden vier Typen von Methoden-Referenzen:
 \begin{itemize}
 	\item Statische Methode: \verb|System::currentTimeMillis|
-	\item Instanzmethode eines Objektes: \verb|System.out::println|
+	\item Instanzmethode eines Objektes: \verb|Account::getId|
 	\item Instanzmethode einer bel. Instanz einer gewissen Klasse: \verb|String::length|
 	\item Konstruktor: \verb|String::new|
 \end{itemize}
@@ -102,10 +104,11 @@ Mit Lambdas lassen sich dann tolle Dinge anstellen wie Event-Listener oder Runna
 
 Mit Java 8 wurde ein neue Datenstruktur Stream eingeführt, welche es ermöglicht Funktionen elegant auf Datenstrukturen anzuwenden. Dadurch stehen in Java Funktionen höherer Ordnung (\textit{higher order functions}) zur Verfügung, welche als Argument ein Lambda-Ausdruck entgegennehmen. Nachfolgend einige Beispiele dieser neuen \textit{Aggregate Operations (aka Bulk Operations)}:
 \begin{description}
-	\item[for-each:] Funktionalität auf jedes Element anwenden (z.B. \verb|accounts.forEach(a -> a.addInterest());|)
+	\item[forEach:] Funktionalität auf jedes Element anwenden (z.B. \verb|accounts.forEach(a -> a.addInterest());|)
 	\item[filter:] Neue Sequenz erstellen aus den Resultaten, wenn auf jedes originale Element ein Filter angewandt wurde (z.B. \verb|accounts.filter(a -> a.balance() > 1_000_000 );|)
 	\item[map:] Neue Sequenz erstellen aus den Resultaten, wenn auf jedes originale Element eine Abbildung angewandt wurde. (z.B. \verb|accounts.map(a -> a.balance());|)
-	\item[reduce:] Produziert einzelnes Resultat aus allen Elementen (z.B. \verb|accounts.map(a -> a.balance()).reduce(0, (b1, b2) -> b1+b2);|)
+	\item[reduce:] Produziert einzelnes Resultat aus allen Elementen \\ 
+	(z.B. \verb|accounts.map(a -> a.balance()).reduce(0, (b1, b2) -> b1+b2);|)
 \end{description}
 Neben dem generischen Stream gibt es aus Performance-Gründen auch Streams für diese drei primitiven Datentypen, welche direkt von \verb|BaseStream| erben:
 \begin{itemize}
@@ -115,7 +118,7 @@ Neben dem generischen Stream gibt es aus Performance-Gründen auch Streams für 
 \end{itemize}
 Um einen Stream zu bekommen kann man z.B. die \verb|stream()|-Methode des \verb|Collection|-Interfaces aufrufen oder eine statische Factory-Methode eines Stream-Interfaces benutzen (z.B. \verb|range()| von \verb|IntStream|). Stream-Operationen wie \verb|filter()|, \verb|map()| usw. produzieren wieder einen Stream \textbf{(intermediate/lazy)} und werden erst ausgewertet wenn sie wirklich gebraucht werden. Stream-Operationen wie \verb|forEach()|, \verb|reduce()| usw. produzieren keinen neuen Stream \textbf{(terminal/eager)} sondern werten die intermediate-Streams zu einem Resultat aus. Nach dem Aufruf einer terminal-Operation ist der Stream \textit{aufgebraucht}, es kann also nur eine terminal-Operation pro Stream aufgerufen werden. Dass intermediate-Streams nicht sofort ausgewertet werden hat einen positiven Einfluss auf die Performance. 
 
-Bei der \verb|reduce()|-Methode muss immer eine \textit{Identity} mitgegeben werden. Die Identity sollte dass Resultat einer Funktion nicht verändern (neutraler Wert). Möchte man z.B. einen \verb|IntStream| summieren, wäre die Identity 0 weil 0 das Resultat nicht verändert (z.B. 3 + 0 = 3). Listing \ref{lst:stream} zeigt einen Stream, welcher in fluent Programming definiert wurde.
+Bei der \verb|reduce()|-Methode muss immer eine \textit{Identity} mitgegeben werden. Die Identity sollte dass Resultat einer Funktion nicht verändern (neutraler Wert). Möchte man z.B. einen \verb|IntStream| summieren, wäre die Identity 0 weil 0 das Resultat nicht verändert (z.B. 3 + 0 = 3). Listing \ref{lst:stream} zeigt einen Stream, welcher in \textit{fluent Programming} definiert wurde.
 
 \begin{lstlisting}[language=Java, caption=Stream, label=lst:stream]
 int sum = widgets.stream()
@@ -142,7 +145,7 @@ Es lassen sich auch unendliche Streams (z.B. mit \verb|DoubleStream.generate(Mat
 \newpage
 
 \section{Optional<T>}
-Wer kennt sie nicht, die wohl teuerste Exception in der Geschichte der Informatik. Man nennt sie \emph{Null Pointer Exception} unter Experten auch als \emph{NPE} bekannt. Diese Fehler sind immer zu vermeiden, wenn korrekt mit \verb|null| umgegangen wird. Leider hat Java das nicht mit der Sprache selbst gelöst, wie beispielsweise Swift. Erst in Java 8 gibt es nun ein Konstrukt in Form einer generischen Klasse namens \verb|Optional|. Auch \verb|reduce| gibt ein \verb|Optional| zurück.
+Wer kennt sie nicht, die wohl teuerste Exception in der Geschichte der Informatik. Man nennt sie \emph{Null Pointer Exception} unter Experten auch als \emph{NPE} bekannt. Diese Fehler sind immer zu vermeiden, wenn korrekt mit \verb|null| umgegangen wird. Leider hat Java das nicht mit der Sprache selbst gelöst, wie beispielsweise Swift. Erst in Java 8 gibt es nun ein Konstrukt in Form einer generischen Klasse namens \verb|Optional|. \verb|findFirst()| gibt z.B. ein \verb|Optional| zurück.
 
 \begin{lstlisting}[language=Java, caption=Optional]
 String[] namesArray = {"Joe", "Tara", "Sue", "Tim" };
@@ -164,16 +167,17 @@ Java bietet nun diverse Methoden an um einfacher mit Strings umzugehen.
 \begin{lstlisting}[language=Java, caption=String]
 // Strings zusammenfügen
 String.join(" ", "The", "quick", "red", "fox"); // Erstes Argument ist delimiter
+// Ausgabe: The quick red fox
 
 // Auch über Iterables möglich
-String[] namesArr = { "Joe", "sara", "Sue", "Tim" };
-List<String> nameList = Arrays.asList(namesArr);
+List<String> nameList = Arrays.asList({ "Joe", "Sara", "Sue", "Tim" });
 String.join("-", nameList);
+//Ausgabe: Joe-Sara-Sue-Tim
 
 // Oder über den StringJoiner
 StringJoiner sj = new StringJoiner(":", "[", "]");
-sj.add("George").add("Sally").add("Fred");
-String desiredString = sj.toString();
+String desiredString = sj.add("George").add("Sally").add("Fred").toString();
+// Ausgabe: [George:Sally:Fred]
 \end{lstlisting}
 
 \section{Comparator}

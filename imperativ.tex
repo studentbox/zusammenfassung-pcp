@@ -1,6 +1,6 @@
 \chapter{Imperative Programmierung (C \& Java)}
 
-Nachfolgend wird je ein Beispiel für ein imperatives (\ref{lst:c-imperativ}), ein strukturiertes (\ref{lst:c-strukturiert}) und ein prozedurales (\ref{lst:c-prozedural}) C-Programm.
+Nachfolgend wird je ein Beispiel für ein imperatives (\ref{lst:c-imperativ}), ein strukturiertes (\ref{lst:c-strukturiert}) und ein prozedurales (\ref{lst:c-prozedural}) C-Programm gezeigt, welches den GGT berechnet.
 
 \begin{lstlisting}[language=C, caption=Imperatives C-Programm, label=lst:c-imperativ]
 int a = 25; 				// Variablen-Deklaration
@@ -38,6 +38,8 @@ int gcd(int a, int b) { 			// Funktionskopf
 \end{lstlisting}
 
 C kennt nicht nur elementare Datentypen (\verb|int, char, Array[]| usw.), sondern auch zusammengesetzte Datentypen (z.B. Kunde, Stack usw.). In C können zusammengesetzte Datentypen und Datenstrukturen mit Hilfe von Strukturen (\verb|struct|) und einer Typdefinition (\verb|typedef|) erzeugt werden. Strukturen fassen eine Liste von Variablen zusammen. Strukturen werden in C als Werte (\textit{call by value}) an Funktionen übergeben. Möchte man Strukturen als Referenz übergeben, muss man Zeiger und Pointer verwenden. Listing \ref{lst:struct} zeigt die Definition und Anwendung einer Struktur.
+
+\newpage
 
 \begin{lstlisting}[language=C, caption=Strukturen, label=lst:struct]
 // Definition

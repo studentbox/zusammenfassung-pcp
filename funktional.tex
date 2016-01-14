@@ -47,7 +47,6 @@ Wenn die Dinge kombiniert werden, dann wird rekursiv ausgewertet. Es werden alle
 \subsection{Funktions-Auswertung}
 Bei einer \textbf{strikten Auswertung} werden alle Argumente zuerst ausgewertet bevor die Funktion aufgerufen wird (Scheme). Eine andere Möglichkeit wäre die \textbf{lazy evaluation}, wobei die unausgewerteten Ausdrücke übergeben werden. Die Auswertung erfolgt erst dann, wenn die Werte benötigt werden.
 
-\newpage
 \section{Namen definieren}
 \begin{lstlisting}[language=Lisp, caption=Namen definieren]
 (define <identifier> <expression>)
@@ -60,6 +59,8 @@ pi: this name was defined previously and cannot be redefined - pi bereits eine S
 
 ; Define wird speziell ausgewertet. Dabei wird der zweite Ausdruck nicht ausgewertet (im Beispiel pi). Zudem ist der Rückgabewerte von define nicht spezifiziert.
 \end{lstlisting}
+
+\newpage
 
 \section{Funktionen}
 Beim Aufruf von Funktionen müssen die aktuellen Parameter in Anzahl, Datentyp (implizit) und Reihenfolge mit den formalen Parameter übereinstimmen. Es gibt keine Start-Funktion (kein main).
@@ -102,7 +103,9 @@ true
 > (< 3 4 5 5)
 false
 
-; AND-Verknüpfungen werden von links nach rechts ausgwertet. Evaluiert ein Ausdruck links zu false, dann wird die Auswertung beendet. Falls ein Ausdruck keinen booleschen Wert zurückgibt, kommt es zum Laufzeitfehler.
+; AND-Verknüpfungen werden von links nach rechts ausgwertet. Evaluiert ein Ausdruck 
+; links zu false, dann wird die Auswertung beendet. Falls ein Ausdruck keinen 
+; booleschen Wert zurückgibt, kommt es zum Laufzeitfehler.
 > (and (= 23.3 23.3) (< 5 7))
 true
 > (and true (+ 3 5))
@@ -144,8 +147,10 @@ false
 Es können eigene Prädikate definiert werden \verb|(define <identifier?> <expression>)|. Am Schluss muss ein Fragezeichen stehen und der Typ vom Rückgabewert muss ein boolean sein.
 
 \section{Symbole}
-Nebst Zahlen und booleschen Werten gibt es Symbole. Symbole sind eine Sequenz von Zeichen angeführt von einem einfachen Anführungszeichen. Es gibt nur eine Operation auf diesem Datentyp \verb|symbol=?|. Symbole sind atomar und können nicht zerlegt werden. Im Gegensatz zu Strings werden sind keine Manipulationen möglich, der Vergleich ist sehr effizient und haben gewisse Einschränkung in der Zeichenwahl.
+Nebst Zahlen und booleschen Werten gibt es Symbole. Symbole sind eine Sequenz von Zeichen angeführt von einem einfachen Anführungszeichen. Es gibt nur eine Operation auf diesem Datentyp \verb|symbol=?|. Symbole sind atomar und können nicht zerlegt werden. Im Gegensatz zu Strings sind keine Manipulationen möglich, der Vergleich ist sehr effizient jedoch haben Symbole gewisse Einschränkung in der Zeichenwahl.
 
+\newpage
+ 
 \begin{lstlisting}[language=Lisp, caption=Symbole]
 > (symbol=? 'Hallo 'Hallo)
 true
@@ -180,7 +185,6 @@ Mittels \verb|cond| können Fallunterscheidungen realisiert werden. Es dürfen b
 )
 \end{lstlisting}
 
-\newpage
 \section{Selektion}
 Mittels \verb|if| können Selektionen realisiert werden. Der \verb|else|-Teil ist nicht optional. \verb|cond| und \verb|if| sind gleichmächtig. Die eine Form kann in die andere Form transformiert werden.
 
@@ -194,12 +198,12 @@ Mittels \verb|if| können Selektionen realisiert werden. Der \verb|else|-Teil is
 > (test 0 (/ 1 0))
 /: division by zero	
 
-; Und nun if direkt aufgerufen
+; Und nun if direkt aufgerufen (Division durch 0 wird erst ausgewertet wenn false)
 >(if (= 0 0) 1 (/ 1 0))
 1
 \end{lstlisting}
 
-\section{Datentyp: Struktur}
+\section{Struktur}
 
 \begin{lstlisting}[language=Lisp, caption=Strukturen]
 ; Definition
@@ -208,7 +212,7 @@ Mittels \verb|if| können Selektionen realisiert werden. Der \verb|else|-Teil is
 ; Durch die Defintion von Strukturen, kommen drei weitere Typen von Funktionen mit:
 
 ; 1. Konstruktor (sind selbstauswertend)
-(make-<typename> <value1>...<valueN>)
+(make-<typename> <value1> ... <valueN>)
 
 ; 2. Prädikatsfunkion
 (<typename>? <objekt>)
@@ -231,8 +235,10 @@ Mittels \verb|if| können Selektionen realisiert werden. Der \verb|else|-Teil is
 > (point-y p1)
 4
 
-; P.S.: Es können keine Typendefintionen definiert werden. In Scheme kommentiert man die Datentypen in den Strukturen. Scheme hat einen vordefinierte Struktur für den Punkt: posn (x y).
+; P.S.: Es können keine Datentypen definiert werden. In Scheme kommentiert man die Datentypen in den Strukturen. Scheme hat einen vordefinierte Struktur für den Punkt: posn (x y).
 \end{lstlisting}
+
+\newpage
 
 \section{Listen}
 Das Problem von Strukturen ist, dass diese nur eine feste Zahl von Daten speichern können. Wir benötigen Listen. Die Elemente in \textbf{rekursiven Datenstrukturen} können Elemente der selben Datenstruktur beinhalten. Ein \textbf{Rekursionsanker} (Rekursionbasis) wird benötigt, um eine endliche Datenstruktur zu bekommen.
@@ -243,7 +249,7 @@ Die Definition einer Liste in Scheme ist rekursiv. Eine Liste ist leer oder best
 (cons <element> empty)
 (cons <element> (cons ... (cons <element> empty)))
 
-> (cons "Bob" (cons "Tom" (cons "John" empty)))
+> (cons "Bob" (cons "Tom" (cons "John" empty))) ; empty nicht vergessen
 (list "Bob" "Tom" "John")
 
 ; List statt cons (handlicher) (wertet Argumente aus)
@@ -251,13 +257,13 @@ Die Definition einer Liste in Scheme ist rekursiv. Eine Liste ist leer oder best
 
 > (list 1 2 3)
 (list 1 2 3)
-> (list (list 'a 1) (list 'b 2))
-(list (list 'a 1) (list 'b 2))
+> (list (+ 1 1) (- 2 2)) ; Argumente werden ausgewertet
+(list 2 0)
 
 ; Quote statt list (noch handlicher) (wertet Argument nicht aus)
 '(1 2 3) 				; ist die Kurzform für (list 1 2 3)
 '((1 2) (3 4) (5 6)) 	; steht für (list (list 1 2) (list 3 4) (list 5 6))
-'(a b c) 				; steht für (list 'a 'b 'c)
+'((+ 1 1) (- 2 2)) 		; steht für (list (+ 1 1) (- 2 2))
 
 ; Listen Funktionen
 empty 							; Leere Liste
@@ -338,7 +344,9 @@ In den obigen Beispielen wurden strukturelle Rekursionen verwendet. Die Struktur
 		[(empty? (rest a-list)) (first a-list)]
 		[else 
 		(cond
+			; 1. Rekursion
 			[(> (first a-list) (list-max (rest a-list))) (first a-list)]
+			; 2. Rekursion
 			[else (list-max (rest a-list))]
 		)
 		]
@@ -348,8 +356,12 @@ In den obigen Beispielen wurden strukturelle Rekursionen verwendet. Die Struktur
 > (list-max (list 2 3 6 5 9 1))
 9
 
-; Arbeitet mit kleinen Listen schnell, aber auf grossen Listen sehr langsam. Das Problem ist, dass die Lösung zwei Rekursionen hat - die Rekursionsaufrufe verdoppeln sich!
+; Arbeitet mit kleinen Listen schnell, aber auf grossen Listen sehr langsam. Das 
+; Problem ist, dass die Lösung zwei Rekursionen hat - die Rekursionsaufrufe
+; verdoppeln sich!
 \end{lstlisting}
+
+\newpage
 
 \subsection{Akkumulative Rekursion}
 Auch bekannt als strukturelle Rekursion mit Akkumulator. Der Algorithmus merkt sich Zwischenresultate (accumulate = sammeln) und übergibt diese an den nächsten rekursiven Aufruf.
@@ -369,23 +381,26 @@ Auch bekannt als strukturelle Rekursion mit Akkumulator. Der Algorithmus merkt s
 Bei der strukturellen Rekursion sind die Parameter beim Aufruf unverändert oder eine Stufe näher zum Basisfall. Bei der akkumulativen Rekursion ist zudem ein Akkumulator (Sammler) als Parameter vorhanden. Dabei finden sich immer Hilfsfunktionen, welche von der eigentlichen Funktion umhüllt (wrapped) werden. Auch akkumulative Rekursionen können endrekursiv sein.
 
 \subsection{Generative Rekursion}
-Möchte man die Berechnung des grössten gemeinsamen Teilers (GCD) mittels akkumulative Rekursion berechnen, ist dies leider ineffizient. Der generative Ansatz verfolgt das Muster (Divide \& Conquer). Teile das Probleme in Teilprobleme. Herrsche über die Teilprobleme. Kombiniere die Lösungen der Teilprobleme zur Gesamtlösung. Design von generativ rekursiven Funktionen ist eher kreativ. Die Parameter werden bei jedem Aufruf neu berechnet (generiert). Man muss auf folgendes achten: \textbf{Es ist auf korrekte Parameter und die Terminierung der Rekursion zu achten}.
+Möchte man die Berechnung des grössten gemeinsamen Teilers (GCD) mittels akkumulative Rekursion berechnen, ist dies leider ineffizient. Der generative Ansatz verfolgt das Muster (Divide \& Conquer). Teile das Probleme in Teilprobleme. Herrsche über die Teilprobleme. Kombiniere die Lösungen der Teilprobleme zur Gesamtlösung. Design von generativ rekursiven Funktionen ist eher kreativ. Die Parameter werden bei jedem Aufruf neu berechnet (generiert). Es ist auf korrekte Parameter und die Terminierung der Rekursion zu achten.
 
 \begin{lstlisting}[language=Lisp, caption=Generative Rekursion - Beispiel GCD]
 ; Akkumulative Rekursion
-(define (gcd-struct n m)
-	(first-divisor m n (min m n)))
-	(define (first-divisor g h i)
+(define (gcd-struct n m) (first-divisor m n (min m n)))
+	
+(define (first-divisor g h i)
 	(cond
 		[(= i 1) 1]
-		[(and (= (remainder g i) 0)
-			(= (remainder h i) 0)) i]
+		; Ist g und h durch den Divisor i teilbar, i zurückgeben
+		[(and (= (remainder g i) 0) (= (remainder h i) 0)) i]
+		; Divisor dekrementieren und rekursiver Aufruf
 		[else (first-divisor g h (- i 1))]
 ))
 
-; Euklid war etwas schlauer. Er verwendet eine generative Rekursion: Der trivial lösbare Fall ist m=0. Und der generative Schritt gcd-euclid mit n und (remainder n m) als Argumente. Die Argumente basieren auf keinem rekurisven Datentypen. Die Argumente werden bei jedem Aufruf neu berechnet.
-(define (gcd-euclid n m)
-	(cond
+; Euklid war etwas schlauer. Er verwendet eine generative Rekursion: Der trivial 
+; lösbare Fall ist m=0. Und der generative Schritt gcd-euclid mit n und 
+; (remainder n m) als Argumente. Die Argumente basieren auf keinem rekurisven 
+; Datentypen. Die Argumente werden bei jedem Aufruf neu berechnet.
+(define (gcd-euclid n m) (cond
 		[(zero? m) n]
 		[else (gcd-euclid m (remainder n m))]
 ))
@@ -394,12 +409,10 @@ Möchte man die Berechnung des grössten gemeinsamen Teilers (GCD) mittels akkum
 \subsection{Strukturell vs. Akkmulative vs. Generativ}
 
 \begin{itemize}
-	\item Bei der strukturellen Rekursion sind die Parameter bei einem Aufruf entweder unverändert oder eine Stufe näher zum Basisfall.
+	\item Bei der strukturellen Rekursion sind die Parameter bei einem Aufruf entweder unverändert oder eine Stufe näher zum Basisfall. Rekursion läuft entlang der Datenstruktur.
 	\item Bei der akkumulativen Rekursion sind die Parameter wie oben und haben einen oder mehrere Akkumulator (Sammler) Parameter.
 	\item In der generativen Rekursion werden die Parameter bei jedem Aufruf neu berechnet (generiert); Es ist auf  korrekte Parameter und die Terminierung der generative Rekursion zu achten.
 \end{itemize}
-
-\newpage
 
 \section{Namensräume}
 Die mit \verb|define| definierten Namen sind global gültig. Zu jedem Zeitpunkt liegen also eine Menge von Namen mit Bindung für Werte und Funktionen vor. Diese veränderliche Bindungen bilden die \textbf{globale Umgebung}.
@@ -471,7 +484,7 @@ In der funktionalen Programmierung werden grundsätzlich zwei Arten von Funktion
 	\item[Funktionen erster Ordnung:] Die Berechnungsmethodik ist fest vorgegeben, nur die Werte der Variablen können unterschiedlich sein.
 	\item[Funktionen höherer Ordnung:] Die Berechnungsmethodik sowie die Werte der Variablen können von aussen übergeben werden.
 \end{description}
-Funktionen sind in Scheme \textit{Werte erster Klasse (first class citizen)}, den sie können als Parameter oder Rückgabewert dienen, an Namen gebunden werden und in Listen aufgenommen werden. Sie bilden einen eigenständigen Datentyp. Funktionen, die andere Funktionen als Parameter und/oder Resultat haben, heissen \textit{Funktionen höherer Ordnung}, bzw. \textit{Higher-Order Functions}. Durch \textit{Funktionen höherer Ordnung} lassen sich komplexe Sachverhalte einfach und kompakt darstellen. In Prolog kann nur \verb|not| als Funktion der booleschen Operatoren übergeben werden. \verb|and| und \verb|or| können nicht als Parameter übergeben werden. Scheme bietet zahlreiche Funktionen (\verb|filter|, \verb|map|, \verb|apply|) an, um effizient mit Listen zu arbeiten. Nebst Funktionen können in Scheme auch die eingebauten Operatoren, wie beispielsweise die Vergleichsoperatoren >, < und = als Paramter in einer Variablen übergeben werden.
+Funktionen sind in Scheme \textit{Werte erster Klasse (first class citizen)}, den sie können als Parameter oder Rückgabewert dienen, an Namen gebunden werden und in Listen aufgenommen werden. Sie bilden einen eigenständigen Datentyp. Funktionen, die andere Funktionen als Parameter und/oder Resultat haben, heissen \textit{Funktionen höherer Ordnung}, bzw. \textit{Higher-Order Functions}. Durch \textit{Funktionen höherer Ordnung} lassen sich komplexe Sachverhalte einfach und kompakt darstellen. In Scheme kann nur \verb|not| als Funktion der booleschen Operatoren übergeben werden. \verb|and| und \verb|or| können nicht als Parameter übergeben werden. Scheme bietet zahlreiche Funktionen (\verb|filter|, \verb|map|, \verb|apply|) an, um effizient mit Listen zu arbeiten. Nebst Funktionen können in Scheme auch die eingebauten Operatoren, wie beispielsweise die Vergleichsoperatoren >, < und = als Paramter in einer Variablen übergeben werden.
 
 \subsection{Funktion \texttt{filter}}
 
@@ -518,7 +531,7 @@ Wenn du meinst \verb|map| und \verb|apply| machen eigentlich das selbe, schau ma
 In Scheme liefert die Auswertung eines Lambda-Ausdrucks eine anonyme Funktion zurück, welches einen Wert repräsentiert, weil Funktionen Werte sind. Ein Lambda-Ausdruck hat folgende Syntax \verb|((lambda (<formal parameters>) <expression>) <argument-list>)|. Die Parameter der Funktion werden beim Ausdruck \verb|<formal parameters>| übergeben. Der Rumpf der Funktion ist der \verb|<expression>|-Teil. Zudem kann eine Liste von Argumenten definiert werden, welche den Parametern zugewiesen werden. Listing \ref{lst:lambda-scope} zeigt, dass ein Parameter welcher in der Lambda-Funktion definiert wurde, nicht von aussen beeinflusst werden kann.
 
 \begin{lstlisting}[language=Lisp, caption=Scope eines Lambda-Ausdrucks, label=lst:lambda-scope]
-> (define x 100)
+> (define x 500)
 > (define y 200)
 > ((lambda (x) (+ x y)) 100) ; Das x oben hat nichts mit diesem x zu tun
 300
@@ -555,7 +568,7 @@ Ein weiteres Element der imperativen Programmierung in Scheme ist die Sequenz. E
 
 \section{Ein- und Ausgabe}
 
-Scheme benutzt Ports für die Ein- und Ausgabe. Ports bedienen Datenquellen oder -senken, z.B. File, Terminal oder TCP Verbindung. Diese sind wie Scheme-Objekte und handeln den ganzen In- und Output. Ein Port muss offen sein, bevor man ihn zum Lesen oder Schreiben benutzen kann. Der Standard I/O Port, d.h. der Konsolen I/O-Port, ist beim Start von Scheme automatisch offen. Listing \ref{lst:read-file} zeigt wie man in Scheme eine Datei einliest. Bei \verb|open-input-file| wird der Prot zurückgegeben und der Zeiger wird auf den Beginn der Datei gesetzt (auf das erste Symbol). Es ist immer darauf zu achten, dass bei Output-Streams schlussendlich geflusht und geschlossen wird.
+Scheme benutzt Ports für die Ein- und Ausgabe. Ports bedienen Datenquellen oder -senken, z.B. File, Terminal oder TCP Verbindung. Diese sind wie Scheme-Objekte und handeln den ganzen In- und Output. Ein Port muss offen sein, bevor man ihn zum Lesen oder Schreiben benutzen kann. Der Standard I/O Port, d.h. der Konsolen I/O-Port, ist beim Start von Scheme automatisch offen. Listing \ref{lst:read-file} zeigt wie man in Scheme eine Datei einliest. Bei \verb|open-input-file| wird der Prot zurückgegeben und der Zeiger wird auf den Beginn der Datei gesetzt (auf das erste Symbol). Es sollte nach jeder Schreib- bzw. Leseoperation der Port geflusht und geschlossen werden. In Scheme stehen zahlreiche Bibliotheken für Lese-/Schreib-Funktionen zur Verfügung (z.B. batch-io).
 
 \begin{lstlisting}[language=Lisp, caption=Datei lesen, label=lst:read-file]
 ; Port öffnen, um aus der Datei zu lesen
@@ -593,5 +606,3 @@ Listing \ref{lst:write-file} zeigt wie man eine Liste in eine Datei schreibt. Ex
 	)
 )
 \end{lstlisting}
-
-Es sollte nach jeder Schreib- bzw. Leseoperation der Port geflusht und geschlossen werden. In Scheme stehen zahlreiche Bibliotheken für Lese-/Schreib-Funktionen zur Verfügung (z.B. batch-io).

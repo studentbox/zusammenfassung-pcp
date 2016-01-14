@@ -28,9 +28,9 @@ true.
 
 % Bei Anfragen können auch Variabeln definiert werden. Alle gross geschriebenen 
 % Wörter sind Variabeln. Prolog sucht nun nach allen Matches, welche als erstes 
-% Element horse haben. Als Resultat werden alle möglichen X Werte geliefert. (Prolog 
+% Element horse haben. Als Resultat werden alle möglichen X Werte geliefert (Prolog 
 % liefert immer nur ein Resultat - möchte man weitere Resultate ansehen, muss 
-% Semikolon gedrückt und um die Abfrage zu beenden den Punkt Operator wählen.)
+% Semikolon gedrückt werden).
 ?- bigger(horse, X).
 X = dog ;
 X = sheep ;
@@ -236,15 +236,15 @@ true.
 true.
 \end{lstlisting}
 
-Die \textbf{Präzedenz} (Operatorrangfolge) von einem Operator definiert, wie stark ein Operator seine Operanden bindet. Eine tiefere Präzedenz bedeutet eine stärkere Bindung. Dadurch wird definiert, wann welcher Operator auf seine Operanden angewendet wird. In SWI-Prolog wird dieser Wert zwischen 1 und 1200 angegeben. Der Haupt-Funktor von einem Term ist der Operator mit der höchsten Präzedenz. Der \textbf{Operator-Typ} definiert die relative Reihenfolge von Operator f und Operanden x und y. Es gibt die folgenden drei Typen:
+Die \textbf{Präzedenz} (Operatorrangfolge) von einem Operator definiert, wie stark ein Operator seine Operanden bindet. Eine tiefere Präzedenz bedeutet eine stärkere Bindung. Dadurch wird definiert, wann welcher Operator auf seine Operanden angewendet wird. In SWI-Prolog wird dieser Wert zwischen 1 und 1200 angegeben. Der Haupt-Funktor von einem Term ist der Operator mit der höchsten Präzedenz. Der \textbf{Operator-Typ} definiert die relative Reihenfolge vom Operator f und den Operanden x und y. Es gibt die folgenden drei Typen:
 
 \begin{description}
-	\item[Infix] xfx, xfy, yfx. Operator ist zwischen den beiden Operanden.
-	\item[Präfix] fx, fy. Operator f ist vor dem Operand.
-	\item[Postfix] xf, yf. Operator f ist nach dem Operand.	
+	\item[Infix] \verb|xfx|, \verb|xfy|, \verb|yfx|. Operator ist zwischen den beiden Operanden.
+	\item[Präfix] \verb|fx|, \verb|fy|. Operator \verb|f| ist vor dem Operand.
+	\item[Postfix] \verb|xf|, \verb|yf|. Operator \verb|f| ist nach dem Operand.	
 \end{description}
 
-Mit x und y wird die Präzedenz der Operanden einer Operation f festgelegt. X repräsentiert einen Operanden, dessen Präzedenz strickt kleiner ist als die Präzedenz vom Operator f. Y repräsentiert einen Operanden, dessen Präzedenz kleiner oder gleich derjenige vom Operator f ist. Dies dient schlussendlich dazu, dass auch folgendes korrekt ausgewertet wird: \emph{1 - 2 - 3 }. 
+Mit \verb|x| und \verb|y| wird die Präzedenz der Operanden einer Operation \verb|f| festgelegt. \verb|x| repräsentiert einen Operanden, dessen Präzedenz strickt kleiner ist als die Präzedenz vom Operator \verb|f|. \verb|y| repräsentiert einen Operanden, dessen Präzedenz kleiner oder gleich derjenige vom Operator \verb|f| ist. Dabei stellt sich die Frage wie \verb|1 - 2 - 3| ausgwertet wird. Es kann \verb|(1 - 2) - 3 = -4| oder \verb|1 - (2 - 3) = 2| ausgewertet werden. Der Minus-Operand ist vom Typ \verb|yfx| d.h. der linke Operand darf gleich gross sein (\verb|y|) und der rechte Operand muss kleiner sein \verb|x|. Daraus kann man schliessen dass der rechte Operand (\verb|x|) kein Minus-Operand sein darf, weil sonst die Präzedenz gleich gross ist. Der rechte Operand muss also eine Zahl sein (hat Präzedenz 0).
 
 \begin{figure}[h!]
 \centering
@@ -256,7 +256,7 @@ Mit x und y wird die Präzedenz der Operanden einer Operation f festgelegt. X re
 \newpage
 In der API-Dokumentation von Prolog werden folgende Zeichen eingesetzt:
 \begin{description}
-	\item[-] Operand sollte ungebunden (d.h. nicht instanziiert) sein. Also eine Variable (Wert wird durch Prädikat zugewiesen).
+	\item[--] Operand sollte ungebunden (d.h. nicht instanziiert) sein. Also eine Variable (Wert wird durch Prädikat zugewiesen).
 	\item[+] Operand sollte gebunden (d.h. instanziiert) sein. Also eine Zahl, ein Atom oder ein gebundener zusammengesetzter Term (Term wird vom Prädikat gebraucht).
 	\item[?] Operand kann gebunden oder ungebunden sein.
 \end{description}
@@ -279,6 +279,8 @@ C = 1.0.
 S = 3.0.
 \end{lstlisting}
 
+\newpage
+
 \subsection{Vergleichsoperatoren}
 \verb|>| grösser als, \verb|<| kleiner als, \verb|>=| grösser-gleich, \verb|=<| kleiner-gleich, \verb|=:=| Gleichheit, \verb|=\=| Ungleichheit.
 
@@ -294,8 +296,6 @@ true.
 ?- 44 =\= 42 + 1. % is 44 unequal to 42+1?
 true.
 \end{lstlisting}
-
-\newpage
 
 \section{Rekursion}
 Prolog Prädikate können rekursiv definiert sein. Ein Prädikat ist rekursiv definiert, falls sich eine oder mehrere Regeln in ihrer Definition auf sich selber beziehen. Dies wird in Prolog häufig eingesetzt.
@@ -368,6 +368,8 @@ p(...) :- ..., 	% all deterministic and
 
 Im Listing \ref{lst:naiv-fib} ist die rekursive Berechnung alles andere als effizient. Möchte man die Fibonacci Zahl für 30 berechnen, führt dies auf herkömmlichen Rechnern zu einem \verb|ERROR: Out of local stack|. Das Problem ist, dass viele Zwischenresultate mehrmals berechnet werden müssen. Für \verb|f(6)| muss 5x \verb|f(2)| ausgewertet werden. Die Umwandlung von einem naivem Prolog-Programm in ein endrekursives ist nicht trivial! Typischerweise werden zusätzlich neue Argumente verwendet: Akkumulatoren. Diese werden verwendet um Zwischenresultate zu speichern.
 
+\newpage
+
 \begin{lstlisting}[caption=Endrekursive Fibonnaci-Berechnung]
 fib_tr(N, F) :- fib_tr(N, 0, 1, F). % call accumulator
 fib_tr(0, A, _, A). 				% simple case
@@ -380,13 +382,12 @@ fib_tr(N, A, B, F) :- 				% general case
 
 Fazit: Falls der Speicherplatz bei einer rekursiven Prozedur kritisch wird, hilft die Umwandlung in ein endrekursive Prozedur. Diese kann als Iteration ausgeführt werden, benötigt oft weitere Argumente: Akkumulatoren.
 
-\newpage
-
 \subsection{Memoization}
 Die Wissensdatenbank kann nicht nur statisch sondern auch dynamisch zur Laufzeit manipuliert werden. Dies kann für Memoization (auch Caching) genutzt werden.
 
 \begin{lstlisting}[caption=dynamic/1]
-% Damit Prädikate zur Laufzeit modifiziert werden können, müssen diese mit dynamic definiert werden.
+% Damit Prädikate zur Laufzeit modifiziert werden können, müssen diese mit dynamic
+% definiert werden.
 :- dynamic bigger/2.
 bigger(elephant, horse).
 bigger(horse, dog).
@@ -437,8 +438,6 @@ bigger(horse, sheep).
 bigger(elephant, me).
 \end{lstlisting}
 
-\newpage
-
 \begin{lstlisting}[caption=Naive Fibonnaci optimiert mit Assertions]
 % Nach jeder Berechnung einer Fibonacci Zahl wird diese in die Wissensdatenbank an 
 % den Anfang (wichtig) gespeichert. Diese müssen nun nicht mehr neu berechnet 
@@ -470,6 +469,8 @@ Z = [].
 
 Die nicht-leeren Listen bestehen immer aus dem ersten Element (Kopf=head) und den restlichen Elementen (Schwanz=tail). Der Schwanz ist wiederum eine Liste. Somit sind Listen rekursiv aufgebaut.
 
+\newpage
+
 \begin{lstlisting}[caption=Tail-Operator auf Listen]
 ?- [a, b, c] = [Head | Tail].
 Head = a,
@@ -485,7 +486,6 @@ X2 = b,
 X3 = c.
 \end{lstlisting}
 
-\newpage
 \subsection{Listenzugehörigkeit}
 Ist X ein Element der Liste L? X kommt in der Liste vor, wenn X gleich Kopf der Liste ist oder wenn es im Schwanz der Liste vorkommt. 
 
@@ -516,8 +516,7 @@ false.
 ?- mem(a, L), mem(b, L), mem(c, L). % which list L contains a, b, & c?
 L = [a, b, c|_G2239];
 L = [a, b, _G2238, c|_G2242];
-L = [a, b, _G2238, _G2241, c|_G2245];
-...
+L = [a, b, _G2238, _G2241, c|_G2245] ...
 
 % So wäre Permutation möglich. Die Länge der Liste beschränken!
 ?- L = [_, _, _], mem(a, L), mem(b, L), mem(c, L).
@@ -529,12 +528,11 @@ L = [b, c, a];
 L = [c, b, a];
 false.
 
-% P.S. In Prolog gibt es bereits das Prädikat member/2.
+% In Prolog gibt es bereits das Prädikat member/2.
 \end{lstlisting}
 
-\newpage
 \subsection{Listenkonkatenation}
-Wir wollen wissen, ob Liste L1 und Liste L2 zusammenhängt Liste L3 ergeben. Einfacher Fall: Wenn die L1 eine leere Liste ist, dann muss L2 und L3 gleich sein. Falls die erste Liste nicht leer ist, hat diese einen Kopf und Schwanz [X, L1]. Die Konkenation muss den gleichen Kopf haben, also [X, L3].
+Wir wollen wissen, ob Liste L1 und Liste L2 zusammenhängt Liste L3 ergeben. Einfacher Fall: Wenn L1 eine leere Liste ist, dann muss L2 und L3 gleich sein. Falls die erste Liste nicht leer ist, hat diese einen Kopf und Schwanz \verb/[X | L1]/. Die Konkenation muss den gleichen Kopf haben, also \verb/[X | L3]/.
 
 \begin{lstlisting}[caption=Listenkonkatenation]
 conc([], L, L).
@@ -561,8 +559,6 @@ L2 = [];
 false.
 \end{lstlisting}
 
-\newpage
-
 \section{Reihenfolge von Regeln und Zielen}
 Die Reihenfolgen der Fakten und Regeln in der Wissensdatenbank spielt ein Rolle. Auch die Reihenfolge der Ziele von Regeln.
 
@@ -588,6 +584,7 @@ ib_1(X, Y) :- bigger(X, Y). % rule 2
 % Backtracking - ineffizienter. Dies kann also die Effizienz von Prozeduren
 % verschlechtern.
 
+
 % Rule 1 und Rule 2 vertauscht (Reihenfolge von Regeln und Zielen vertauscht):
 bigger(elephant, horse). 	% fact 1
 bigger(horse, dog). 		% fact 2
@@ -603,10 +600,8 @@ ib_2(X, Y) :- bigger(X, Y). % rule 2
 
 Es sollten zuerst immer die einfachen Dinge probiert werden. Typischerweise zuerst die Rekursionsbasis (einfacher Fall) und dann erst den allgemeinen Fall. 
 
-\newpage
-
 \section{Konjunktion und Diskonjunktion}
-Beim definieren von Regeln wird nach \verb|:-| die Ziele definiert. Einzelne Ziele werden dabei durch Komma getrennt, welches eine AND-Verknüpfung also einer Konjunktion entsprechen. Die Regel wird mit dem Punkt-Operator abgeschlossen. Auch Anfragen können verUNDet werden. Disjunktion (ODER) können mit Semikolon realisiert werden. Konjunktion und Disjunktion sind handelsübliche Prädikate. 
+Beim Definieren von Regeln wird nach \verb|:-| die Ziele definiert. Einzelne Ziele werden dabei durch Komma getrennt, welches eine AND-Verknüpfung also einer Konjunktion entsprechen. Die Regel wird mit dem Punkt-Operator abgeschlossen. Auch Anfragen können verUNDet werden. Disjunktion (ODER) können mit Semikolon realisiert werden. Konjunktion und Disjunktion sind handelsübliche Prädikate. 
 
 \begin{lstlisting}[caption=Disjunktion]
 rich(tom). 			% fact 1
@@ -640,16 +635,9 @@ Das Backtracking ist für Prolog charakteristisch. Dies kann aber oft zu Ineffiz
 
 Mittels dem CUT-Operator \verb|!/0| kann Einfluss aufs Backtracking genommen werden. Dieser nimmt kein Argument, ist immer erfüllt und bindet die bisherige Wahl innerhalb der aktuellen Klausel.
 
-\begin{lstlisting}[caption=Beispiel CUT-Operator]
-% Wenn in folgender Regel der CUT erreicht wird. Bindet uns das zur linken Seite, 
-% nämlich zur spezifischen Klausel p und zu der Wahl b. Es bindet uns jedoch nicht 
-% zur rechten Seite - im Beispiel zur Wahl c.
-p(X) :- b(X), !, c(X).
-\end{lstlisting}
-
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.6\linewidth]{fig/prolog-suchbaum-cut}
+\includegraphics[width=0.7\linewidth]{fig/prolog-suchbaum-cut}
 \caption{Prolog Suchbaume mit und ohne CUT}
 \label{fig:prolog-suchbaum-cut}
 \end{figure}
@@ -690,8 +678,7 @@ Zudem sollte man darauf achten, dass die Variable welche \verb|not(X)| übergebe
 great_food(mekong).
 great_food(eule).
 limited_seating(mekong).
-good_place(Restaurant) :-
-	not(limited_seating(Restaurant)).
+good_place(Restaurant) :- not(limited_seating(Restaurant)).
 	
 ?- great_food(X), good_place(X). 	% query 1
 X = eule. 							% as expected
@@ -713,15 +700,15 @@ In Prolog können Constraint-Satisfaction-Probleme (CSP) relativ einfach mit Con
 	\item Domänen, aus welchen die Variablen Werte annehmen können
 	\item Constraints (Bedingungen) welche die Variablen erfüllen müssen
 \end{enumerate}
-Vereinfacht gesagt setzt CLP alle Werte der gegebenen Domäne in die Variablen ein bis die Bedingungen erfüllt sind. Damit CLP funktioniert muss eine Bibliothek (z.B. \verb|use_module(library(clpr)).|) importiert werden, welche die Domäne darstellt. Die entsprechende Bedingung muss in gschweifte Klammern geschrieben werden (z.B. \verb|{ X + 1 = 5}|). In Prolog stehen die folgenden drei Domänen zur Verfügung:
+Vereinfacht gesagt setzt CLP alle Werte der gegebenen Domäne in die Variablen ein, bis die Bedingungen erfüllt sind. Damit CLP funktioniert muss eine Bibliothek (z.B. \verb|use_module(library(clpr)).|) importiert werden, welche die Domäne darstellt. Die entsprechende Bedingung muss in gschweifte Klammern geschrieben werden (z.B. \verb|{X + 1 = 5}|). In Prolog stehen die folgenden drei Domänen zur Verfügung:
 \begin{description}
-	\item[CLP-R:] Alle Variablen müssen reelle Zahlen annehmen
-	\item[LP-Q:] Alle Variablen müssen rationale Zahlen annehmen
+	\item[CLP-R] Alle Variablen müssen reelle Zahlen annehmen
+	\item[LP-Q] Alle Variablen müssen rationale Zahlen annehmen
 	\item[CLP-FD] Alle Variablen müssen Zahlen aus einem selbst definierten Wertebereich annehmen.
 \end{description}
 Bei CLP-FD können die Domänen (Wertebereiche) programmatisch definiert werden. Dabei sind folgende Prädikate wichtig:
 \begin{description}
-	\item[in/2:] Legt den Wertebereich einer Variablen fest
+	\item[in/2:] Legt den Wertebereich einer Variable fest
 	\item[ins/2:] Legt den Wertebereich einer Liste von Variablen fest
 	\item[all\_distinct/1:] stellt sicher, dass Variablen in einer Liste paarweise unterschiedliche Werte haben
 	\item[label/1:] Weist allen Variablen einer Liste Werte zu (dadurch werden systematisch Lösungen für das gegebene Problem gesucht)
@@ -752,8 +739,7 @@ Y = 1.
 \end{lstlisting}
 
 \begin{lstlisting}[caption=Beispiel ohne CLP]
-convert(Celsius, Fahrenheit) :-
-	Celsius is (Fahrenheit - 32)*5/9.
+convert(Celsius, Fahrenheit) :-	Celsius is (Fahrenheit - 32)*5/9.
 
 ?- convert(C, 95).
 C = 35.
@@ -764,8 +750,7 @@ ERROR: is/2: Arguments are not sufficiently instantiated
 
 \begin{lstlisting}[caption=Beispiel mit CLP]
 :- use_module(library(clpr)).
-convert_clp(Celsius, Fahrenheit) :-
-	{ Celsius = (Fahrenheit - 32)*5/9 }.
+convert_clp(Celsius, Fahrenheit) :- { Celsius = (Fahrenheit - 32)*5/9 }.
 
 ?- convert_clp(35, F).
 F = 95.0 .
@@ -773,12 +758,13 @@ F = 95.0 .
 ?- convert_clp(C, F).
 {F=32.0+1.7999999999999998*C}.
 
-; Auch Fibonacci in beide Richtungen wird durch CLP möglich.
+% Auch Fibonacci in beide Richtungen wird durch CLP möglich.
 \end{lstlisting}
 
 \begin{lstlisting}[caption=Typische CLP Aufgabe]
-% Theo ist 13 Jahre alt. In 3 Jahren ist der Grossvater doppelt so alt wie Theo's Vater und in 7 Jahren ist der Grossvater viermal so alt wie Theo. Wie
-alt ist der Vater von Theo?
+% Theo ist 13 Jahre alt. In 3 Jahren ist der Grossvater doppelt so alt wie Theo's 
+% Vater und in 7 Jahren ist der Grossvater viermal so alt wie Theo. Wie alt ist der 
+% Vater von Theo?
 
 ?- { T = 13, G+3 = 2*(V+3), G+7 = 4*(T+7) }.
 T = 13.0, 	% current age of Theo
@@ -803,6 +789,8 @@ Bs = [1, 0, 8, 5],
 Cs = [1, 0, 6, 5, 2] .
 \end{lstlisting}
 
+\newpage
+
 \section{Sudoku}
 
 In Prolog kann mittels CLP relativ einfach beliebige Sudokus gelöst werden. Listing \ref{lst:sudoku} zeigt das gesamte Programm. Wenn in jedem Feld eine anonyme Variable übergeben wird, dann returniert Prolog jedes mögliche Sudoku.
@@ -813,13 +801,15 @@ In Prolog kann mittels CLP relativ einfach beliebige Sudokus gelöst werden. Lis
 sudoku(Rows) :-
 	% Fasst alle Listen in Rows zu einer gesamten Liste Vs zusammen
 	append(Rows, Vs), 
-	% Domäne festlegen
+	% Domäne festlegen (Alle Variablen der Liste haben Wert von 1 bis 9)
 	Vs ins 1..9,
-	% Wendet all_distinct auf alle Elemente der Liste Rows an (nur eine Ziffer pro Zeile)
+	% Wendet all_distinct auf alle Elemente der Liste Rows an (nur eine Ziffer pro 
+	% Zeile)
 	maplist(all_distinct, Rows),
 	% Transponiert die Liste Rows zu Liste Columns
 	transpose(Rows, Columns),
-	% Wendet all_distinct auf alle Elemente der Liste Columns an (nur eine Ziffer pro Spalte)
+	% Wendet all_distinct auf alle Elemente der Liste Columns an (nur eine Ziffer 
+	% pro Spalte)
 	maplist(all_distinct, Columns),
 	% Weist die 9 Zeilen in Rows den Variablen A-I zu
 	Rows = [A, B, C, D, E, F, G, H, I],
@@ -853,13 +843,3 @@ Reply = 'Hallo zusammen! Dies ist eine Test-Datei fuer das PCPModul, abgelegt un
 ?- http_post('http://localhost:16316/test',json(['say hi to http post']), SolutionResponse, []).
 SolutionResponse = 'PCPProblemProvider server up and running at http://localhost:16316/, reached via HTTP POST - POSTed data: ["say hi to http post" ]'.
 \end{lstlisting}
-
-JSON-Objekte werden in Prolog in Terme der Form \verb|json([...])| abgepackt, wobei in diese Prolog-Liste jeweils Paare von \verb|Name=Value| kommen (z.B. \verb|{ institution: hslu, dept: t&a }| wird zu \verb|json([institution=hslu, dept=t&a])|).
-\verb|json()| ist also praktisch ein \textit{Markier}-Prädikat (marker predicate) und bietet sonst keine Funktionalität.
-
-\section{Eingebaute Prädikate}
-
-\begin{description}
-	\item[write(+Term)] Mittels write('hallo') kann ein Term auf die Konsole geschrieben werden.
-	\item[read(-Term)] Kann ein Term von der Konsole eingelesen werden.
-\end{description}
